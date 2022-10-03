@@ -18,10 +18,9 @@ class CreatePackageSubscriptionsTable extends Migration
             $table->bigInteger('package_id');
             $table->boolean('status')->default(false);
             $table->integer('subscription_id')->nullable();
-            $table->double('discount_type')->nullable();
-            $table->double('discount_amount')->nullable();
-            $table->boolean('discounted')->default(false);
-            $table->double('total')->nullable();
+            $table->boolean('active')->default(1);
+            $table->bigInteger('deleted_by')->nullable();
+
             $table->timestamps();
         });
     }

@@ -17,6 +17,8 @@ class CreateComSubscriptionTable extends Migration
             $table->id();
             $table->integer('company_id');
             $table->integer('subscription_id');
+            $table->boolean('active')->default(1);
+            $table->bigInteger('deleted_by')->nullable();
             $table->timestamps();
         });
     }

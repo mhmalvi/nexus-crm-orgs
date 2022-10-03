@@ -32,6 +32,8 @@ class CreateCompaniesTable extends Migration
             $table->string('form')->nullable();
             $table->string('subscription_id');
             $table->integer('business_type')->default(1);
+            $table->boolean('active')->default(1);
+            $table->bigInteger('deleted_by')->nullable();
             $table->timestamps();
         });
     }

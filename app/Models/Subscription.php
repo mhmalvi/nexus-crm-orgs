@@ -5,10 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PackageSubscription extends Model
+class Subscription extends Model
 {
     use HasFactory;
-
     protected $guarded = [];
-    protected $table = 'package_subscriptions';
 }

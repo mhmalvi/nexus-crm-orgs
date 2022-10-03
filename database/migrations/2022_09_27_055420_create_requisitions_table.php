@@ -32,6 +32,8 @@ class CreateRequisitionsTable extends Migration
             $table->string('fb_ac_credential');
             $table->string('secret_key');
             $table->string('form')->nullable();
+            $table->boolean('active')->default(1);
+            $table->bigInteger('deleted_by')->nullable();
             $table->timestamps();
         });
     }

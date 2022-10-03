@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class CompanySalesTeamController extends Controller
 {
@@ -24,22 +25,22 @@ class CompanySalesTeamController extends Controller
 
         try {
             //update the company sales team table
-            $update = DB::table('com_sales_team')->where('id', $request->company_id)
+            $update = DB::table('com_sales_team')->where('company_id', $request->company_id)
                 ->update([
 
                     'user_id' => $request->user_id,
                 ]);
 
-            if ($update) {
+            if ($update > 0) {
                 return response()->json([
                     'key' => 'success',
                     'message' => 'successfully user id updated'
-                ], 200);
+                ], 202);
             } else {
                 return response()->json([
                     'key' => 'fail',
                     'message' => 'fail user id updated'
-                ], 404);
+                ], 304);
             }
         } catch (\Throwable $th) {
             return response()->json([
@@ -54,26 +55,33 @@ class CompanySalesTeamController extends Controller
      * @param  \App\Models\Company  $company
      * @return \Illuminate\Http\Response
      */
-    public function destroy($user_id)
+
+    public function destroy($id, $user_id)
     {
+
         try {
+            //delete the company 
+            $delete = DB::table('com_sales_team')->where('id', $id)
+                ->update(
+                    [
+                        'active' => 0,
+                        'deleted_by' => $user_id
+                    ]
+                );
 
-
-            $delete =  DB::table('com_sales_team')->where('user_id', $user_id)->delete();
-
+            //send the response
             if ($delete) {
-
                 return response()->json([
                     'key' => 'success',
-                    'message' => 'successfully data deleted'
-                ], 200);
+                    'message' => 'Company Sales Team has been soft deleted successfully'
+                ], 202);
             } else {
                 return response()->json([
-                    'key' => 'success',
-                    'message' => 'fail data deleted'
+                    'key' => 'fail',
+                    'message' => 'Company Sales Team soft delete fail'
                 ], 404);
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 500);

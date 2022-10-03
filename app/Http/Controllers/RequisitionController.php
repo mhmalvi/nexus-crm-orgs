@@ -110,7 +110,7 @@ class RequisitionController extends Controller
                 return response()->json([
                     'key' => 'success',
                     'message' => 'Successfully status updated'
-                ], 200);
+                ], 202);
             } else {
                 return response()->json([
                     'key' => 'fail',

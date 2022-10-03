@@ -20,6 +20,8 @@ class CreatePackagesTable extends Migration
             $table->integer('package_type_limit')->nullable();
             $table->integer('business_type')->default(1);
             $table->text('package_details')->nullable();
+            $table->boolean('active')->default(1);
+            $table->bigInteger('deleted_by')->nullable();
 
             $table->timestamps();
         });

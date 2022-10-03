@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class CompanyController extends Controller
 {
-
     /**
      * 
      *
@@ -32,24 +31,13 @@ class CompanyController extends Controller
             'secret_key' => 'required',
         ]);
 
-
-
         try {
-
-            // save the logo in destination folder
-            $filename = '';
-            if ($request->file('logo')) {
-                $file = $request->logo;
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $path = public_path('assets/img/logo');
-                $file->move($path, $filename);
-            }
 
             //insert all data in database
             $company_id = Company::create([
                 'name' => $request->name,
                 'description' => $request->description,
-                'logo' => empty($filename) ? '' : $filename,
+                'logo' => null,
                 'contact' => $request->contact,
                 'business_email' => $request->business_email,
                 'address' => $request->address,
@@ -88,12 +76,9 @@ class CompanyController extends Controller
             //sent the json response
             return response()->json([
                 'key' => 'success',
-                'message' => 'Successfully data inserted'
+                'message' => 'Company has been created successfully'
             ], 201);
         } catch (Throwable $e) {
-
-
-
             //send error response
             return response()->json([
                 'error' => $e->getMessage()
@@ -123,14 +108,8 @@ class CompanyController extends Controller
         ]);
 
         try {
-            // save the logo in destination folder
+
             $filename = '';
-            if ($request->file('logo')) {
-                $file = $request->logo;
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $path = public_path('assets/img/logo');
-                $file->move($path, $filename);
-            }
 
             //insert all data in database
             $company = Company::where('id', $request->id)
@@ -154,8 +133,13 @@ class CompanyController extends Controller
             if ($company) {
                 return response()->json([
                     'key' => 'success',
-                    'message' => 'Successfully data updated'
-                ], 200);
+                    'message' => 'Company has been updated successfully'
+                ], 202);
+            } else {
+                return response()->json([
+                    'key' => 'fail',
+                    'message' => 'Company create fail'
+                ], 404);
             }
         } catch (Throwable $e) {
 
@@ -171,25 +155,48 @@ class CompanyController extends Controller
      * @param  \App\Models\Company  $company
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Company $company, $id)
+    public function destroy(Company $company, $id, $user_id)
     {
+
         try {
             //delete the company 
-            $company = Company::find($id);
-            $company->delete();
-
-            //delete the sales team 
-            DB::table('com_sales_team')->where('company_id', $id)->delete();
+            $delete = Company::where('id', $id)
+                ->update(
+                    [
+                        'active' => 0,
+                        'deleted_by' => $user_id
+                    ]
+                );
 
             //send the response
-            return response()->json([
-                'key' => 'success',
-                'message' => 'Successfully data deleted'
-            ], 200);
+            if ($delete) {
+                return response()->json([
+                    'key' => 'success',
+                    'message' => 'Company has been soft deleted successfully'
+                ], 202);
+            } else {
+                return response()->json([
+                    'key' => 'fail',
+                    'message' => 'Company soft delete fail'
+                ], 404);
+            }
         } catch (Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function cusfile(Request $request)
+    {
+
+        return $request->all();
+
+        return response()->json([
+
+            'logo_id' => 1,
+            'logo_path' => 'crm.company.com/api/update/company',
+
+        ]);
     }
 }
