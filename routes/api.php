@@ -38,6 +38,7 @@ Route::get('/delete/sales/team/{id}/{user_id}', [CompanySalesTeamController::cla
 
 
 //Package Route
+Route::get('get/package', [PackageController::class, 'getPackage']);
 Route::post('store/package', [PackageController::class, 'store']);
 Route::post('update/package', [PackageController::class, 'update']);
 Route::get('delete/package/{id}/{user_id}', [PackageController::class, 'destroy']);

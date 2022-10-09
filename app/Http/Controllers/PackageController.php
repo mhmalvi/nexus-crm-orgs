@@ -12,6 +12,26 @@ use Throwable;
 
 class PackageController extends Controller
 {
+
+    /**
+     * 
+     * 
+     *  get the resources 
+     * 
+     * 
+     */
+    public function getPackage()
+    {
+
+        //get all packages
+        $packages = Package::all();
+
+        return response()->json([
+
+            'packages' => $packages
+
+        ]);
+    }
     /**
      * check package limit for adding sales team new member
      *
