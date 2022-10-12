@@ -99,15 +99,6 @@ class PackageController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -156,6 +147,41 @@ class PackageController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * get the resource for editing
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        try {
+
+            // get the required package
+            $package = Package::find($id);
+
+            if ($package) {
+                return response()->json([
+                    'key' => 'success',
+                    'message' => 'Package has been created successfully',
+                    'package' => $package
+                ], 200);
+            } else {
+
+                return response()->json([
+
+                    'key' => 'fail',
+                    'message' => 'Package does not found'
+
+                ], 404);
+            }
+        } catch (Throwable $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     /**
      * Update the specified resource in storage.
