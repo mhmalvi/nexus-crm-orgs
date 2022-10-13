@@ -61,6 +61,11 @@ Route::post('store/subscription', [SubscriptionController::class, 'store']);
 Route::post('update/subscription', [SubscriptionController::class, 'update']);
 Route::get('delete/subscription/{id}/{user_id}', [SubscriptionController::class, 'destroy']);
 
+//Notice Route
+Route::post('notice/list', [\App\Http\Controllers\NoticeController::class, 'index']);
+Route::post('notice/create', [\App\Http\Controllers\NoticeController::class, 'create']);
+Route::put('notice/{id}/update', [\App\Http\Controllers\NoticeController::class, 'update']);
+Route::post('notice/delete', [\App\Http\Controllers\NoticeController::class, 'delete']);
 
 //dummy
 Route::post('/file', [CompanyController::class, 'cusfile']);
