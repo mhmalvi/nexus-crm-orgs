@@ -19,16 +19,16 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-
         //validation for all input
         $request->validate([
             'name' => 'required',
             'contact' => 'required',
             'business_email' => 'required',
-            'website' => 'required',
             'admin' => 'required|unique:companies',
             'fb_ac_credential' => 'required',
             'secret_key' => 'required',
+            'subscription_id' => 'required',
+            'business_type' => 'required',
         ]);
 
         try {
@@ -37,10 +37,10 @@ class CompanyController extends Controller
             $company_id = Company::create([
                 'name' => $request->name,
                 'description' => $request->description,
-                'logo' => null,
+                'logo_id' => isset($request->logo_id)?$request->logo_id:'',
                 'contact' => $request->contact,
                 'business_email' => $request->business_email,
-                'address' => $request->address,
+                'address' => isset($request->address)?$request->address:'',
                 'abn' => $request->abn,
                 'website' => $request->website,
                 'trading_name' => $request->trading_name,
@@ -49,19 +49,8 @@ class CompanyController extends Controller
                 'admin' => $request->admin,
                 'fb_ac_credential' => $request->fb_ac_credential,
                 'secret_key' => $request->secret_key,
-                'form' => $request->form,
                 'subscription_id' => $request->subscription_id,
-                'business_type' => $request->business_type,
-                'created_at' => date("Y-m-d", time()),
-                'updated_at' => date("Y-m-d", time()),
-            ])->id;
-
-            //create a company sales team row according to company id
-            DB::table('com_sales_team')->insert([
-                'company_id' => $company_id,
-                'user_id' => $request->user_id,
-                'created_at' => date("Y-m-d", time()),
-                'updated_at' => date("Y-m-d", time()),
+                'business_type' => $request->business_type
             ]);
 
             //create a company subscription row according to company id, initially it must be null
@@ -96,16 +85,11 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company)
     {
 
-        //validation for all input
-        $request->validate([
-            'name' => 'required',
-            'contact' => 'required',
-            'business_email' => 'required',
-            'website' => 'required',
-            'fb_ac_credential' => 'required',
-            'secret_key' => 'required',
-
-        ]);
+        if(!isset($request->id))
+            return response()->json([
+                'status' => false,
+                'message' => 'Id not found',
+            ], 401);
 
         try {
 
@@ -116,7 +100,7 @@ class CompanyController extends Controller
                 ->update([
                     'name' => $request->name,
                     'description' => $request->description,
-                    'logo' => empty($filename) ? '' : $filename,
+                    'logo_id' => $request->logo_id,
                     'contact' => $request->contact,
                     'business_email' => $request->business_email,
                     'address' => $request->address,

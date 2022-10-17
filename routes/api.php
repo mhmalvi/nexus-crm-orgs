@@ -22,10 +22,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //Company Route
-Route::post('/store/company/', [CompanyController::class,  'store']);
-Route::post('/update/company/', [CompanyController::class,  'update']);
+Route::post('/company/create', [CompanyController::class,  'store']);
+Route::put('/company/update', [CompanyController::class,  'update']);
 Route::get('/delete/company/{id}/{user_id}', [CompanyController::class,  'destroy']);
-
 
 //Requisition Route
 Route::post('/store/requisition', [RequisitionController::class, 'store']);
@@ -33,6 +32,8 @@ Route::post('/update/status/requisition', [RequisitionController::class, 'update
 
 
 //Company Sales Team Route
+Route::get('/company/{company_id}/employee/list', [CompanySalesTeamController::class,  'index']);
+Route::post('/company/employee/create', [CompanySalesTeamController::class,  'create']);
 Route::post('/update/sales/team', [CompanySalesTeamController::class, 'update']);
 Route::get('/delete/sales/team/{id}/{user_id}', [CompanySalesTeamController::class, 'destroy']);
 
