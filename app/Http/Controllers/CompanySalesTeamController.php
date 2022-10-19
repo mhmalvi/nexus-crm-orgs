@@ -79,7 +79,7 @@ class CompanySalesTeamController extends Controller
     public function create(Request $request)
     {
 
-        if(!isset($request->company_id) && !isset($request->user_id))
+        if(!isset($request->company_id) || !isset($request->user_id))
             return response()->json([
                 'status' => false,
                 'message' => 'Company Id and User Id required',

@@ -10,7 +10,7 @@ class NoticeController extends Controller
     /**
      * Notice List
      * @param Request $request
-     * @return boolean
+     * @return \Illuminate\Http\JsonResponse boolean
      */
     public function index(Request $request)
     {
@@ -51,7 +51,7 @@ class NoticeController extends Controller
     /**
      * Create Notice
      * @param Request $request
-     * @return Payment Setting
+     * @return \Illuminate\Http\JsonResponse Payment Setting
      */
     public function create(Request $request)
     {
@@ -87,7 +87,7 @@ class NoticeController extends Controller
     /**
      * Update Notice
      * @param Request $request
-     * @return boolean
+     * @return \Illuminate\Http\JsonResponse boolean
      */
     public function update(Request $request)
     {
@@ -98,7 +98,7 @@ class NoticeController extends Controller
             ], 401);
 
         try {
-            $companyNotice = CompanyNotice::find($request->id)->first();
+            $companyNotice = CompanyNotice::find($request->id);
             if($companyNotice==""){
                 return response()->json([
                     'status' => false,
@@ -126,7 +126,7 @@ class NoticeController extends Controller
     /**
      * Soft Delete Notice
      * @param Request $request
-     * @return boolean
+     * @return \Illuminate\Http\JsonResponse
      */
     public function delete(Request $request)
     {
@@ -138,7 +138,8 @@ class NoticeController extends Controller
 
         //dd($request->id);
         try {
-            $leadCheckList = CompanyNotice::find($request->id)->first();
+            $leadCheckList = CompanyNotice::find($request->id);
+            //dd($leadCheckList);
             if($leadCheckList==""){
                 return response()->json([
                     'status' => false,
@@ -150,13 +151,14 @@ class NoticeController extends Controller
             $leadCheckList->save();
             return response()->json([
                 'status' => true,
-                'message' => 'Notice Delete Successfully',
+                'message' => 'Notice Delete Successfully'
             ], 201);
 
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
+
             ], 500);
         }
     }
