@@ -221,6 +221,46 @@ class CompanyController extends Controller
         }
     }
 
+    /**
+     * Get Company By Company Id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCompanyByCompanyId(Request $request)
+    {
+        if(!isset($request->id))
+            return response()->json([
+                'status' => false,
+                'message' => 'Company not found',
+            ], 401);
+
+        try {
+
+            $company = Company::find($request->id);
+
+             //dd($company->toArray());
+            if($company==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data not found',
+                ], 401);
+            }
+
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Company details',
+                'data'    => $company->toArray()
+            ], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 

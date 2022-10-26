@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 */
 //Company Route
 Route::post('/company/create', [CompanyController::class,  'store']);
+Route::get('/company/{id}/details', [CompanyController::class, 'getCompanyByCompanyId']);
 Route::put('/company/update', [CompanyController::class,  'update']);
 Route::get('/delete/company/{id}/{user_id}', [CompanyController::class,  'destroy']);
 Route::post('/company/details/user', [CompanyController::class, 'getCompanyByUser']);
