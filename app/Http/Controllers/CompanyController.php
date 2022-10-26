@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\DB;
 class CompanyController extends Controller
 {
     /**
-     * 
      *
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -80,7 +80,7 @@ class CompanyController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Company  $company
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Company $company)
     {
@@ -137,13 +137,13 @@ class CompanyController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Company  $company
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Company $company, $id, $user_id)
     {
 
         try {
-            //delete the company 
+            //delete the company
             $delete = Company::where('id', $id)
                 ->update(
                     [
@@ -171,16 +171,69 @@ class CompanyController extends Controller
         }
     }
 
-    public function cusfile(Request $request)
+    /**
+     * Get Company By User
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCompanyByUser(Request $request)
     {
+        if(!isset($request->user_id) || !isset($request->role_id))
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found',
+            ], 401);
 
-        return $request->all();
+        try {
+            if($request->role_id==3){ // If Admin
+                $company = Company::select('*');
+                $company =$company->where('admin',$request->user_id);
+                $company = $company->first();
+            }else{
+                $company = Company::join('company_sales_employee', function ($join) {
+                    $join->on('company_sales_employee.company_id', '=', 'companies.id');
+                })->where('company_sales_employee.user_id', $request->user_id)
+                    //->where('lead_details.client_id', '=', $request->client_id)
+                ->first();
+            }
+            // dd($company->toArray());
+            if($company==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data not found',
+                ], 401);
+            }
 
-        return response()->json([
+            if($request->role_id==3){ // If Admin
+                $company->company_id = $company->id;
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Company details',
+                'data'    => $company->toArray()
+            ], 201);
 
-            'logo_id' => 1,
-            'logo_path' => 'crm.company.com/api/update/company',
-
-        ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
+
+
+
+
+//    public function cusfile(Request $request)
+//    {
+//
+//        return $request->all();
+//
+//        return response()->json([
+//
+//            'logo_id' => 1,
+//            'logo_path' => 'crm.company.com/api/update/company',
+//
+//        ]);
+//    }
 }

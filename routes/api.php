@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/company/create', [CompanyController::class,  'store']);
 Route::put('/company/update', [CompanyController::class,  'update']);
 Route::get('/delete/company/{id}/{user_id}', [CompanyController::class,  'destroy']);
+Route::post('/company/details/user', [CompanyController::class, 'getCompanyByUser']);
 
 //Requisition Route
 Route::post('/store/requisition', [RequisitionController::class, 'store']);

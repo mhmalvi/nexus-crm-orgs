@@ -13,7 +13,7 @@ class CompanySalesTeamController extends Controller
     /**
      * Company Employee List
      * @param Request $request
-     * @return boolean
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -60,7 +60,7 @@ class CompanySalesTeamController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'All Sales Employee',
-                'data'    => json_decode($response->body())
+                'data'    => isset(json_decode($response->body())->data)?json_decode($response->body())->data:''
             ], 201);
 
         } catch (\Throwable $th) {
@@ -74,7 +74,7 @@ class CompanySalesTeamController extends Controller
     /**
      * Create Sales Employee
      * @param Request $request
-     * @return Sales Employee
+     * @return \Illuminate\Http\JsonResponse Employee
      */
     public function create(Request $request)
     {
