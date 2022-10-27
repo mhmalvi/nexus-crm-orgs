@@ -13,52 +13,41 @@ class RequisitionController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        //validation for all input
-        $request->validate([
-
-            'name' => 'required',
-            'role_id' => 'required',
-            'status' => 'required',
-            'contact' => 'required',
-            'business_email' => 'required',
-            'website' => 'required',
-            'fb_ac_credential' => 'required',
-            'secret_key' => 'required',
-
-        ]);
-
+        //dd($request);
+        if(!isset($request->email) || !isset($request->company_name) || !isset($request->packages_id) || !isset($request->business_email) || !isset($request->contact))
+            return response()->json([
+                'status' => false,
+                'message' => 'Company Name, packages_id, Email and Personal information required',
+            ], 401);
+        $existData = Requisition::where('email', $request->email)->first();
+        if($existData!=""){
+            return response()->json([
+                'status' => false,
+                'message' => 'Email Address Exist',
+            ], 401);
+        }
         try {
-            // save the logo in destination folder
-            $filename = '';
-            if ($request->file('logo')) {
-                $file = $request->logo;
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $path = public_path('assets/img/logo');
-                $file->move($path, $filename);
-            }
             //insert all data in database
-            $create = Requisition::create([
+            $create = Requisition::updateOrcreate([
                 'name' => $request->name,
                 'email' => $request->email,
-                'role_id' => $request->role_id,
-                'status' => $request->status,
+                'packages_id' => $request->packages_id,
+                'status' => 1,
                 'contact' => $request->contact,
-                'description' => $request->description,
-                'logo' => empty($filename) ? '' : $filename,
-                'business_email' => $request->business_email,
-                'address' => $request->address,
-                'abn' => $request->abn,
-                'website' => $request->website,
-                'trading_name' => $request->trading_name,
-                'rto_code' => $request->rto_code,
-                'country_name' => $request->country_name,
-                'fb_ac_credential' => $request->fb_ac_credential,
-                'secret_key' => $request->secret_key,
-                'form' => $request->form,
+                'description' => isset($request->description)?$request->description:'',
+                'logo' => isset($request->logo_id)?$request->logo_id:'',
+                'business_email' => isset($request->business_email)?$request->business_email:'',
+                'address' => isset($request->address)?$request->address:'',
+                'abn' => isset($request->abn)?$request->abn:'',
+                'website' => isset($request->website)?$request->website:'',
+                'trading_name' => isset($request->trading_name)?$request->trading_name:'',
+                'rto_code' => isset($request->rto_code)?$request->rto_code:'',
+                'country_name' => isset($request->country_name)?$request->country_name:'',
+                'company_name' => isset($request->company_name)?$request->company_name:''
             ]);
 
             //send response
@@ -86,7 +75,7 @@ class RequisitionController extends Controller
      * Update the the status of requition
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Requisition  $requisition
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function updateRequisition(Request $request, Requisition $requisition)
     {
