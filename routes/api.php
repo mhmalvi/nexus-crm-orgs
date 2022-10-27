@@ -29,8 +29,10 @@ Route::get('/delete/company/{id}/{user_id}', [CompanyController::class,  'destro
 Route::post('/company/details/user', [CompanyController::class, 'getCompanyByUser']);
 
 //Requisition Route
+Route::get('/requisition/list', [RequisitionController::class, 'getRequisitionList']);
 Route::post('/store/requisition', [RequisitionController::class, 'store']);
 Route::post('/update/status/requisition', [RequisitionController::class, 'updateRequisition']);
+
 
 
 //Company Sales Team Route

@@ -114,4 +114,37 @@ class RequisitionController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get Requisition List
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getRequisitionList(Request $request)
+    {
+        try {
+            $coursesList = Requisition::select('*');
+            //$coursesList =$coursesList->where('status',1);
+            $coursesList = $coursesList->get();
+            // dd($leadCheckList);
+            if($coursesList==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Requisition not found',
+                ], 401);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'All Requisition',
+                'data'    => $coursesList->toArray()
+            ], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
 }
