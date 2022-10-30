@@ -25,8 +25,6 @@ class CompanyController extends Controller
             'contact' => 'required',
             'business_email' => 'required',
             'admin' => 'required|unique:companies',
-            'fb_ac_credential' => 'required',
-            'secret_key' => 'required',
             'subscription_id' => 'required',
             'business_type' => 'required',
         ]);
