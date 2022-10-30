@@ -36,7 +36,6 @@ class RequisitionController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'packages_id' => $request->packages_id,
-                'status' => 1,
                 'contact' => $request->contact,
                 'description' => isset($request->description)?$request->description:'',
                 'logo' => isset($request->logo_id)?$request->logo_id:'',
