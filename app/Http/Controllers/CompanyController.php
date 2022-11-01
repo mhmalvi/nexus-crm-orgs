@@ -13,6 +13,41 @@ use Illuminate\Support\Facades\DB;
 class CompanyController extends Controller
 {
     /**
+     * Company List
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCompanyList(Request $request)
+    {
+        try {
+            $companyList = Company::select('*');
+            if(isset($request->id))
+                $companyList =$companyList->where('id',$request->id);
+            $companyList =$companyList->where('active',1);
+            $companyList = $companyList->get();
+            // dd($companyList);
+            if($companyList==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Company not found',
+                ], 401);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'All Company',
+                'data'    => $companyList->toArray()
+            ], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      *
      *
      * @return \Illuminate\Http\JsonResponse
