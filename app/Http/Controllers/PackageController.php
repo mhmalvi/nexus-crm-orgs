@@ -120,6 +120,7 @@ class PackageController extends Controller
         ]);
 
         try {
+
             //insert all data in database
             $create = Package::updateOrcreate([
                 'package_name' => $request->package_name,
