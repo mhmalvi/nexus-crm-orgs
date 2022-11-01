@@ -78,8 +78,6 @@ class RequisitionController extends Controller
      */
     public function updateRequisition(Request $request, Requisition $requisition)
     {
-
-
         //validation the status
         $request->validate([
             'status' => 'required'

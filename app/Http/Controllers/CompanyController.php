@@ -269,7 +269,12 @@ class CompanyController extends Controller
 
         try {
 
-            $company = Company::find($request->id);
+            //$company = Company::find($request->id);
+            $company = Company::join('packages', function ($join) {
+                $join->on('companies.subscription_id', '=', 'packages.id');
+            })->where('companies.id', $request->id)
+                //->where('lead_details.client_id', '=', $request->client_id)
+                ->get();
 
              //dd($company->toArray());
             if($company==""){

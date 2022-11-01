@@ -112,7 +112,7 @@ class PackageController extends Controller
         $request->validate([
 
             'package_name' => 'required',
-            'package_type' => 'required|unique:packages', //pacakge type = 1 means user type package, package type = 2 means time limitation package ,  package type = 3 means storage limitation package
+            'package_type' => 'required', //pacakge type = 1 means user type package, package type = 2 means time limitation package ,  package type = 3 means storage limitation package
             'package_type_limit' => 'required',
             'business_type' => 'required',
             'package_details' => 'required',
@@ -121,12 +121,13 @@ class PackageController extends Controller
 
         try {
             //insert all data in database
-            $create = Package::create([
+            $create = Package::updateOrcreate([
                 'package_name' => $request->package_name,
                 'package_type' => $request->package_type,
                 'business_type' => $request->business_type,
                 'package_details' => $request->package_details,
-                'package_type_limit' => $request->package_type_limit,
+                'price' => $request->price,
+                'package_type_limit' => $request->package_type_limit
             ]);
 
             //send response
