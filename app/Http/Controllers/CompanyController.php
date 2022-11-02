@@ -74,16 +74,17 @@ class CompanyController extends Controller
                 'contact' => $request->contact,
                 'business_email' => $request->business_email,
                 'address' => isset($request->address)?$request->address:'',
-                'abn' => $request->abn,
-                'website' => $request->website,
-                'trading_name' => $request->trading_name,
-                'rto_code' => $request->rto_code,
-                'country_name' => $request->country_name,
-                'admin' => $request->admin,
-                'fb_ac_credential' => $request->fb_ac_credential,
-                'secret_key' => $request->secret_key,
-                'subscription_id' => $request->subscription_id,
-                'business_type' => $request->business_type
+                'abn' => isset($request->abn)?$request->abn:'',
+                'website' => isset($request->website)?$request->website:'',
+                'trading_name' => isset($request->trading_name)?$request->trading_name:'',
+                'rto_code' => isset($request->rto_code)?$request->rto_code:'',
+                'country_name' => isset($request->country_name)?$request->country_name:'',
+                'admin' =>  isset($request->admin)?$request->admin:0,
+                'app_id' => isset($request->app_id)?$request->app_id:'',
+                'fb_ac_credential' => isset($request->fb_ac_credential)?$request->fb_ac_credential:'',
+                'secret_key' => isset($request->secret_key)?$request->secret_key:'',
+                'subscription_id' => isset($request->subscription_id)?$request->subscription_id:0,
+                'business_type' => isset($request->business_type)?$request->business_type:1
             ]);
 
             //create a company subscription row according to company id, initially it must be null
@@ -142,6 +143,7 @@ class CompanyController extends Controller
                     'trading_name' => $request->trading_name,
                     'rto_code' => $request->rto_code,
                     'country_name' => $request->country_name,
+                    'app_id' => $request->app_id,
                     'fb_ac_credential' => $request->fb_ac_credential,
                     'secret_key' => $request->secret_key,
                     'form' => $request->form,
@@ -308,6 +310,61 @@ class CompanyController extends Controller
     }
 
 
+    /**
+     * Client FB Token update
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateTokenByCompanyId(Request $request)
+    {
+        if(!isset($request->id))
+            return response()->json([
+                'status' => false,
+                'message' => 'Company not found',
+            ], 401);
+
+        try {
+
+            $company = Company::find( $request->id);
+
+            //dd($company->toArray());
+            if($company==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data not found',
+                ], 401);
+            }
+            $appId =  $company->app_id;
+            $fbToken = $company->fb_ac_credential;
+            $secretKey = $company->secret_key;
+
+            $url = "https://graph.facebook.com/v15.0/oauth/access_token?grant_type=fb_exchange_token&client_id=".$appId."&client_secret=".$secretKey."&fb_exchange_token=".$fbToken;
+            $dataArray = json_decode(file_get_contents($url), true);
+
+            if( $dataArray!="" && count($dataArray)>0 && isset($dataArray['access_token'])){
+
+                $company->fb_ac_credential = $dataArray['access_token'];
+                $company->save();
+                //dd($dataArray['access_token']);
+//                $company = Company::where('id', $request->id)
+//                    ->update([
+//                        'fb_ac_credential' => $dataArray['access_token']
+//                    ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Company Token Update Successfully',
+                'data'    => $company->toArray()
+            ], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
 
 
 //    public function cusfile(Request $request)
