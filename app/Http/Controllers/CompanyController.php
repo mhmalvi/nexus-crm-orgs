@@ -276,7 +276,7 @@ class CompanyController extends Controller
                 'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
                 'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
                 'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
-                'companies.fb_ac_credential as fb_ac_credential', 'companies.secret_key as secret_key', 'companies.form as form', 'companies.subscription_id as subscription_id',
+                'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form', 'companies.subscription_id as subscription_id',
                 'companies.business_type as business_type', 'companies.active as active',
                 'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
                 'packages.package_details as package_details', 'packages.price as price')
