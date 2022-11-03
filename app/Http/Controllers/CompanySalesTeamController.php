@@ -47,8 +47,10 @@ class CompanySalesTeamController extends Controller
             $response = Http::post($userServiceAPI.'/user/list', [
                 'users' => json_encode($salesUserIds)
             ]);
+           // dd(json_decode($response->body()));
+           // dd(json_decode($response->body()));
 
-            if(json_decode($response->body())==""){
+            if($response->status()== '401'){
                 return response()->json([
                     'status' => false,
                     'message' => 'User Data not found',
