@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\CompanySalesEmployee;
 use Illuminate\Database\DBAL\TimestampType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -63,11 +64,11 @@ class CompanyController extends Controller
             'subscription_id' => 'required',
             'business_type' => 'required',
         ]);
-
+        DB::beginTransaction();
         try {
 
             //insert all data in database
-            $company_id = Company::create([
+            $company = Company::updateOrcreate([
                 'name' => $request->name,
                 'description' => $request->description,
                 'logo_id' => isset($request->logo_id)?$request->logo_id:'',
@@ -87,6 +88,11 @@ class CompanyController extends Controller
                 'business_type' => isset($request->business_type)?$request->business_type:1
             ]);
 
+            CompanySalesEmployee::updateOrcreate([
+                'company_id' => $company->id,
+                'user_id' => isset($request->admin)?$request->admin:0
+            ])->toArray();
+            DB::commit();
             //create a company subscription row according to company id, initially it must be null
             /*    DB::table('com_subscription')->insert([
                 'company_id' => $company_id,
@@ -103,6 +109,7 @@ class CompanyController extends Controller
             ], 201);
         } catch (Throwable $e) {
             //send error response
+            DB::rollback();
             return response()->json([
                 'error' => $e->getMessage()
             ], 500);
