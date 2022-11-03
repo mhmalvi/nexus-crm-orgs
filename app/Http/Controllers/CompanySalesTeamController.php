@@ -50,7 +50,7 @@ class CompanySalesTeamController extends Controller
            // dd(json_decode($response->body()));
            // dd(json_decode($response->body()));
 
-            if($response->status()== '401'){
+            if($response->status()!= '200'){
                 return response()->json([
                     'status' => false,
                     'message' => 'User Data not found',
