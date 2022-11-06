@@ -253,7 +253,7 @@ class CompanyController extends Controller
                 'status' => true,
                 'message' => 'Company details',
                 'data'    => $company->toArray()
-            ], 201);
+            ], 200);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -301,12 +301,11 @@ class CompanyController extends Controller
                 ], 401);
             }
 
-
             return response()->json([
                 'status' => true,
                 'message' => 'Company details',
                 'data'    => $company->toArray()
-            ], 201);
+            ], 200);
 
         } catch (\Throwable $th) {
             return response()->json([

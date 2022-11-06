@@ -122,7 +122,7 @@ class RequisitionController extends Controller
         try {
             $coursesList = Requisition::select('*');
             //$coursesList =$coursesList->where('status',1);
-            $coursesList = $coursesList->get();
+            $coursesList = $coursesList->orderBy('id', 'desc')->get();
             // dd($leadCheckList);
             if($coursesList==""){
                 return response()->json([
