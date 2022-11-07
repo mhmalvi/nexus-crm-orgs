@@ -28,6 +28,7 @@ Route::put('/company/update', [CompanyController::class,  'update']);
 Route::get('/delete/company/{id}/{user_id}', [CompanyController::class,  'destroy']);
 Route::post('/company/list', [CompanyController::class,  'getCompanyList']);
 Route::post('/company/details/user', [CompanyController::class, 'getCompanyByUser']);
+Route::post('/company/status', [CompanyController::class, 'companyStatus']);
 Route::get('/company/{id}/token/update', [CompanyController::class,  'updateTokenByCompanyId']);
 
 //Requisition Route

@@ -229,12 +229,13 @@ class CompanyController extends Controller
         try {
             if($request->role_id==3){ // If Admin
                 $company = Company::select('*');
-                $company =$company->where('admin',$request->user_id);
+                $company =$company->where('admin',$request->user_id)->where('active', 1);
                 $company = $company->first();
             }else{
                 $company = Company::join('company_sales_employee', function ($join) {
                     $join->on('company_sales_employee.company_id', '=', 'companies.id');
                 })->where('company_sales_employee.user_id', $request->user_id)
+                    ->where('companies.active', 1)
                     //->where('lead_details.client_id', '=', $request->client_id)
                 ->first();
             }
@@ -264,7 +265,7 @@ class CompanyController extends Controller
     }
 
     /**
-     * Get Company By Company Id
+     * Get Company By Company
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -290,6 +291,7 @@ class CompanyController extends Controller
                 ->join('packages', function ($join) {
                 $join->on('companies.subscription_id', '=', 'packages.id');
             })->where('companies.id', $request->id)
+                ->where('companies.active', 1)
                 //->where('lead_details.client_id', '=', $request->client_id)
                 ->get();
 
@@ -371,6 +373,79 @@ class CompanyController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Company Change Status for Active or Inactive
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function companyStatus(Request $request)
+    {
+        if(!isset($request->company_id) || !isset($request->active))
+            return response()->json([
+                'status' => false,
+                'message' => 'Company Id not found',
+            ], 401);
+
+        //dd($request->id);
+        try {
+
+            $companies = Company::find($request->company_id);
+            $companies->active = $request->active;
+            $companies->save();
+
+            $companyEmployee = CompanySalesEmployee::select('*');
+            $companyEmployee =$companyEmployee->where('company_id',$request->company_id);
+            $companyEmployee = $companyEmployee->get();
+            //dd($companyEmployee);
+            if($companyEmployee==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Sales Employee not found',
+                ], 401);
+            }
+
+            $salesUserIds = [];
+            $temp=[];
+            foreach ($companyEmployee->toArray() as $value){
+                $salesUserIds[]['id']=$value['user_id'];
+            }
+            //array_push($salesUserIds, $temp);
+
+
+            $userServiceAPI = env('USER_SERVICE_API', '');
+            //dd(json_encode($salesUserIds));
+            $suspend  = ($request->active==1)?0:1;
+            $response = Http::post($userServiceAPI.'/user/suspend', [
+                'users' => json_encode($salesUserIds),
+                'suspend' => $suspend
+            ]);
+             //dd(json_decode($response->body()));
+            // dd(json_decode($response->body()));
+
+            if($response->status()!= '201'){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User Data not found',
+                ], 401);
+            }
+
+            //dd(json_decode($response->body()));
+
+            return response()->json([
+                'status' => true,
+                'message' => 'All Sales Employee',
+                'data'    => isset(json_decode($response->body())->data)?json_decode($response->body())->data:''
+            ], 201);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 //    public function cusfile(Request $request)
