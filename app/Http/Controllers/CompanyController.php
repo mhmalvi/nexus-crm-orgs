@@ -24,7 +24,7 @@ class CompanyController extends Controller
             $companyList = Company::select('*');
             if(isset($request->id))
                 $companyList =$companyList->where('id',$request->id);
-            $companyList =$companyList->where('active',1);
+            //$companyList =$companyList->where('active',1);
             $companyList = $companyList->get();
             // dd($companyList);
             if($companyList==""){
@@ -235,7 +235,7 @@ class CompanyController extends Controller
                 $company = Company::join('company_sales_employee', function ($join) {
                     $join->on('company_sales_employee.company_id', '=', 'companies.id');
                 })->where('company_sales_employee.user_id', $request->user_id)
-                    ->where('companies.active', 1)
+                    //->where('companies.active', 1)
                     //->where('lead_details.client_id', '=', $request->client_id)
                 ->first();
             }
@@ -291,7 +291,7 @@ class CompanyController extends Controller
                 ->leftJoin('packages', function ($join) {
                 $join->on('companies.subscription_id', '=', 'packages.id');
             })->where('companies.id', $request->id)
-                ->where('companies.active', 1)
+                //->where('companies.active', 1)
                 //->where('lead_details.client_id', '=', $request->client_id)
                 ->get();
 
