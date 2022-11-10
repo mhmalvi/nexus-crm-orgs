@@ -288,7 +288,7 @@ class CompanyController extends Controller
                 'companies.business_type as business_type', 'companies.active as active',
                 'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
                 'packages.package_details as package_details', 'packages.price as price')
-                ->join('packages', function ($join) {
+                ->leftJoin('packages', function ($join) {
                 $join->on('companies.subscription_id', '=', 'packages.id');
             })->where('companies.id', $request->id)
                 ->where('companies.active', 1)
@@ -411,7 +411,7 @@ class CompanyController extends Controller
                 $salesUserIds[]['id']=$value['user_id'];
             }
             //array_push($salesUserIds, $temp);
-
+            //dd(json_encode($salesUserIds));
 
             $userServiceAPI = env('USER_SERVICE_API', '');
             //dd(json_encode($salesUserIds));
@@ -423,19 +423,19 @@ class CompanyController extends Controller
              //dd(json_decode($response->body()));
             // dd(json_decode($response->body()));
 
-            if($response->status()!= '201'){
-                return response()->json([
-                    'status' => false,
-                    'message' => 'User Data not found',
-                ], 401);
-            }
+//            if($response->status()!= '201'){
+//                return response()->json([
+//                    'status' => false,
+//                    'message' => 'User Data not found',
+//                ], 401);
+//            }
 
             //dd(json_decode($response->body()));
 
             return response()->json([
                 'status' => true,
-                'message' => 'All Sales Employee',
-                'data'    => isset(json_decode($response->body())->data)?json_decode($response->body())->data:''
+                'message' => 'Status Update Successfully',
+                //'data'    => isset(json_decode($response->body())->data)?json_decode($response->body())->data:''
             ], 201);
 
         } catch (\Throwable $th) {

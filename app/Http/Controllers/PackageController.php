@@ -116,6 +116,7 @@ class PackageController extends Controller
             'package_type_limit' => 'required',
             'business_type' => 'required',
             'package_details' => 'required',
+            'price' => 'required',
 
         ]);
 
@@ -127,7 +128,7 @@ class PackageController extends Controller
                 'package_type' => $request->package_type,
                 'business_type' => $request->business_type,
                 'package_details' => $request->package_details,
-                'price' => $request->price,
+                'price' => isset($request->price)?$request->price:0,
                 'package_type_limit' => $request->package_type_limit
             ]);
 
