@@ -81,6 +81,7 @@ class CompanyController extends Controller
                 'rto_code' => isset($request->rto_code)?$request->rto_code:'',
                 'country_name' => isset($request->country_name)?$request->country_name:'',
                 'admin' =>  isset($request->admin)?$request->admin:0,
+                'super_admin' =>  isset($request->superAdmin)?$request->superAdmin:0,
                 'app_id' => isset($request->app_id)?$request->app_id:'',
                 'fb_ac_credential' => isset($request->fb_ac_credential)?$request->fb_ac_credential:'',
                 'secret_key' => isset($request->secret_key)?$request->secret_key:'',
