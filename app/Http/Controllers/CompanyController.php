@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\CompanySalesEmployee;
+use App\Models\CompanySubscription;
+use Carbon\Carbon;
 use Illuminate\Database\DBAL\TimestampType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -85,8 +87,13 @@ class CompanyController extends Controller
                 'app_id' => isset($request->app_id)?$request->app_id:'',
                 'fb_ac_credential' => isset($request->fb_ac_credential)?$request->fb_ac_credential:'',
                 'secret_key' => isset($request->secret_key)?$request->secret_key:'',
-                'subscription_id' => isset($request->subscription_id)?$request->subscription_id:0,
                 'business_type' => isset($request->business_type)?$request->business_type:1
+            ]);
+
+            CompanySubscription::updateOrcreate([
+                'company_id' => $company->id,
+                'subscription_id' => isset($request->subscription_id)?$request->subscription_id:0,
+                'active' => 1
             ]);
 
             CompanySalesEmployee::updateOrcreate([
@@ -285,13 +292,17 @@ class CompanyController extends Controller
                 'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
                 'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
                 'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
-                'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form', 'companies.subscription_id as subscription_id',
+                'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
                 'companies.business_type as business_type', 'companies.active as active',
                 'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
-                'packages.package_details as package_details', 'packages.price as price')
+                'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+                ->leftJoin('com_subscription', function ($join) {
+                    $join->on('companies.id', '=', 'com_subscription.company_id')->where('com_subscription.active', '=', 1);
+                })
                 ->leftJoin('packages', function ($join) {
-                $join->on('companies.subscription_id', '=', 'packages.id');
-            })->where('companies.id', $request->id)
+                    $join->on('com_subscription.subscription_id', '=', 'packages.id');
+                })
+                ->where('companies.id', $request->id)
                 //->where('companies.active', 1)
                 //->where('lead_details.client_id', '=', $request->client_id)
                 ->get();
@@ -447,6 +458,69 @@ class CompanyController extends Controller
         }
     }
 
+    public function testCronJob(Request $request){
+
+        $company = Company::select('companies.id as cid',
+            'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
+            'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
+            'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
+            'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
+            'companies.business_type as business_type', 'companies.active as active',
+            'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
+            'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+            ->join('com_subscription', function ($join) {
+                $join->on('companies.id', '=', 'com_subscription.company_id');
+            })
+            ->join('packages', function ($join) {
+                $join->on('com_subscription.subscription_id', '=', 'packages.id');
+            })
+            // Filter Time limit (Type = 2)
+            ->where('packages.package_type', '=', 2)
+            ///////
+            ->where('com_subscription.active', '=', 1)
+            ->where('companies.active', 1)
+            ->get();
+
+        $data = '';
+        if($company!=""){
+
+            foreach ($company as $row){
+                $packageStartTime = $row->package_date;
+                if($row->package_date!=""){
+                    $endDate= Carbon::parse($row->package_date)->addDays($row->package_type_limit);
+                    $today = Carbon::parse(now());
+
+                     $action = $today->lte($endDate);
+                    if($action){
+                        //dd($row);
+                        $sevenDays = Carbon::parse($endDate)->addDays(-7);
+                        $tenDays = Carbon::parse($endDate)->addDays(-10);
+                        $twoDays = Carbon::parse($endDate)->addDays(-2);
+                        //dd($sevenDays. '==>'. $tenDays. '==>' .$twoDays)->format('Y.m.d');
+                        //dd($twoDays->isCurrentDay());
+                        if($sevenDays->isCurrentDay() || $tenDays->isCurrentDay() || $twoDays->isCurrentDay() ){
+                            
+                          dd($row);
+                          // Email for Reminder notification
+                        }
+                    }
+                }
+
+                //$packageEndTime =
+                //dd($packageStartTime);
+
+            }
+
+
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Company Token Update Successfully',
+            'data'    => $company->toArray()
+        ], 201);
+
+    }
 
 
 //    public function cusfile(Request $request)

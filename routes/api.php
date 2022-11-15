@@ -31,6 +31,8 @@ Route::post('/company/details/user', [CompanyController::class, 'getCompanyByUse
 Route::post('/company/status', [CompanyController::class, 'companyStatus']);
 Route::get('/company/{id}/token/update', [CompanyController::class,  'updateTokenByCompanyId']);
 
+Route::get('/company/test-cron', [CompanyController::class,  'testCronJob']);
+
 //Requisition Route
 Route::get('/requisition/list', [RequisitionController::class, 'getRequisitionList']);
 Route::post('/store/requisition', [RequisitionController::class, 'store']);
