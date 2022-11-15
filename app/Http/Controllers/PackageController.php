@@ -212,6 +212,7 @@ class PackageController extends Controller
                 'business_type' => $request->business_type,
                 'package_type_limit' => $request->package_type_limit,
                 'package_details' => $request->package_details,
+                'price' => $request->price,
 
             ]);
             //send response
