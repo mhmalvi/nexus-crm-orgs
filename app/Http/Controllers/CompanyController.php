@@ -482,6 +482,7 @@ class CompanyController extends Controller
             ->get();
 
         $data = '';
+        $subject = '';
         if($company!=""){
 
             foreach ($company as $row){
@@ -498,8 +499,42 @@ class CompanyController extends Controller
                         $twoDays = Carbon::parse($endDate)->addDays(-2);
                         //dd($sevenDays. '==>'. $tenDays. '==>' .$twoDays)->format('Y.m.d');
                         //dd($twoDays->isCurrentDay());
+
                         if($sevenDays->isCurrentDay() || $tenDays->isCurrentDay() || $twoDays->isCurrentDay() ){
-                            
+                            if($twoDays->isCurrentDay())
+                                $subject = 'Reminder!! 2 days before subscription expiration';
+                            if($sevenDays->isCurrentDay())
+                                $subject = 'Reminder!! 7 days before subscription expiration';
+                            if($tenDays->isCurrentDay())
+                                $subject = 'Reminder!! 10 days before subscription expiration';
+
+                            // User Details
+                            if($row->admin>0){
+
+                                $userServiceAPI = env('USER_SERVICE_API', '');
+                                //dd($userServiceAPI);
+                                $response = Http::post($userServiceAPI.'/user/list', [
+                                    'users' => json_encode(array($row->admin))
+                                ]);
+
+                                $userDetails = json_decode($response->body());
+                                //dd($userDetails);
+                                //send response
+                                $emailServiceAPI = env('EMAIL_SERVICE_API', '');
+                                $infoData =[
+                                    'user_details' => $userDetails,
+                                    'company_details' => $row,
+                                    'subject'        => $subject
+                                ];
+                                //dd($invoiceData);
+                                $response = Http::post($emailServiceAPI.'/reminder', [
+                                    'data' => json_encode($infoData)
+                                ]);
+
+                                dd( json_decode($response->body()));
+
+                            }
+
                           dd($row);
                           // Email for Reminder notification
                         }
@@ -508,9 +543,7 @@ class CompanyController extends Controller
 
                 //$packageEndTime =
                 //dd($packageStartTime);
-
             }
-
 
         }
 
