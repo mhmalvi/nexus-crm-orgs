@@ -483,6 +483,7 @@ class CompanyController extends Controller
 
         $data = '';
         $subject = '';
+        $remainDays = '';
         if($company!=""){
 
             foreach ($company as $row){
@@ -493,7 +494,7 @@ class CompanyController extends Controller
 
                      $action = $today->lte($endDate);
                     if($action){
-                        //dd($row);
+
                         $sevenDays = Carbon::parse($endDate)->addDays(-7);
                         $tenDays = Carbon::parse($endDate)->addDays(-10);
                         $twoDays = Carbon::parse($endDate)->addDays(-2);
@@ -501,13 +502,18 @@ class CompanyController extends Controller
                         //dd($twoDays->isCurrentDay());
 
                         if($sevenDays->isCurrentDay() || $tenDays->isCurrentDay() || $twoDays->isCurrentDay() ){
-                            if($twoDays->isCurrentDay())
-                                $subject = 'Reminder!! 2 days before subscription expiration';
-                            if($sevenDays->isCurrentDay())
-                                $subject = 'Reminder!! 7 days before subscription expiration';
-                            if($tenDays->isCurrentDay())
-                                $subject = 'Reminder!! 10 days before subscription expiration';
-
+                            if($twoDays->isCurrentDay()){
+                                $subject = 'Reminder!! 2 days to go';
+                                $remainDays = '2';
+                            }
+                            if($sevenDays->isCurrentDay()){
+                                $subject = 'Reminder!! 7 to go';
+                                $remainDays = '7';
+                            }
+                            if($tenDays->isCurrentDay()){
+                                $subject = 'Reminder!! 10 to go';
+                                $remainDays = '10';
+                            }
                             // User Details
                             if($row->admin>0){
 
@@ -517,28 +523,146 @@ class CompanyController extends Controller
                                     'users' => json_encode(array($row->admin))
                                 ]);
 
-                                $userDetails = json_decode($response->body());
+                                $userDetailsData = json_decode($response->body());
+                                $userDetails= isset($userDetailsData->data[0])?$userDetailsData->data[0]:'';
                                 //dd($userDetails);
                                 //send response
-                                $emailServiceAPI = env('EMAIL_SERVICE_API', '');
-                                $infoData =[
-                                    'user_details' => $userDetails,
-                                    'company_details' => $row,
-                                    'subject'        => $subject
-                                ];
-                                //dd($invoiceData);
-                                $response = Http::post($emailServiceAPI.'/reminder', [
-                                    'data' => json_encode($infoData)
-                                ]);
-
-                                dd( json_decode($response->body()));
+                                if($userDetails!=""){
+                                    $emailServiceAPI = env('EMAIL_SERVICE_API', '');
+                                    $infoData =[
+                                        'user_details' => $userDetails,
+                                        'company_details' => $row,
+                                        'subject'        => $subject,
+                                        'remainDays'   => $remainDays
+                                    ];
+                                    //dd($invoiceData);
+                                    $response = Http::post($emailServiceAPI.'/reminder', [
+                                        'data' => json_encode($infoData)
+                                    ]);
+                                    //dd( json_decode($response->body()));
+                                }
 
                             }
 
-                          dd($row);
+                          //dd($row);
                           // Email for Reminder notification
                         }
                     }
+                }
+
+                //$packageEndTime =
+                //dd($packageStartTime);
+            }
+
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Company Token Update Successfully',
+            'data'    => $company->toArray()
+        ], 201);
+
+    }
+
+    public function testCompanyDownCronJob(Request $request){
+
+        $company = Company::select('companies.id as cid',
+            'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
+            'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
+            'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
+            'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
+            'companies.business_type as business_type', 'companies.active as active',
+            'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
+            'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+            ->join('com_subscription', function ($join) {
+                $join->on('companies.id', '=', 'com_subscription.company_id');
+            })
+            ->join('packages', function ($join) {
+                $join->on('com_subscription.subscription_id', '=', 'packages.id');
+            })
+            // Filter Time limit (Type = 2)
+            ->where('packages.package_type', '=', 2)
+            ///////
+            ->where('com_subscription.active', '=', 1)
+            ->where('companies.active', 1)
+            ->get();
+
+        $data = '';
+        $subject = '';
+        $remainDays = '';
+        if($company!=""){
+
+            foreach ($company as $row){
+                $packageStartTime = $row->package_date;
+                if($row->package_date!=""){
+                    $endDate= Carbon::parse($row->package_date)->addDays($row->package_type_limit);
+
+                    if($endDate->isCurrentDay()){
+
+                        //dd($row);
+
+                        $subject = 'Subscription expiration';
+
+                            // User Details
+                            if($row->admin>0){
+
+                                ///////////Company Inactive //
+
+                                $companies = Company::find($row->cid);
+                                $companies->active = 0;
+                                $companies->save();
+
+                                $companyEmployee = CompanySalesEmployee::select('*');
+                                $companyEmployee =$companyEmployee->where('company_id',$row->cid);
+                                $companyEmployee = $companyEmployee->get();
+                                //dd($companyEmployee);
+                                $salesUserIds = [];
+
+                                if($companyEmployee!=""){
+                                    foreach ($companyEmployee->toArray() as $value){
+                                        $salesUserIds[]['id']=$value['user_id'];
+                                    }
+                                    $userServiceAPI = env('USER_SERVICE_API', '');
+                                    //dd(json_encode($salesUserIds));
+                                    $suspend  = ($request->active==1)?0:1;
+                                    Http::post($userServiceAPI.'/user/suspend', [
+                                        'users' => json_encode($salesUserIds),
+                                        'suspend' => $suspend
+                                    ]);
+                                }
+
+                                //// EOF Company Inactive
+
+                                $userServiceAPI = env('USER_SERVICE_API', '');
+                                //dd($userServiceAPI);
+                                $response = Http::post($userServiceAPI.'/user/list', [
+                                    'users' => json_encode(array($row->admin))
+                                ]);
+
+                                $userDetailsData = json_decode($response->body());
+                                $userDetails= isset($userDetailsData->data[0])?$userDetailsData->data[0]:'';
+                                //dd($userDetails);
+                                //send response
+                                if($userDetails!=""){
+                                    $emailServiceAPI = env('EMAIL_SERVICE_API', '');
+                                    $infoData =[
+                                        'user_details' => $userDetails,
+                                        'company_details' => $row,
+                                        'subject'        => $subject
+                                    ];
+                                    //dd($invoiceData);
+                                    $response = Http::post($emailServiceAPI.'/subscription-expired', [
+                                        'data' => json_encode($infoData)
+                                    ]);
+                                    //dd( json_decode($response->body()));
+                                }
+
+                            }
+
+                            //dd($row);
+                            // Email for Reminder notification
+                        }
+
                 }
 
                 //$packageEndTime =
