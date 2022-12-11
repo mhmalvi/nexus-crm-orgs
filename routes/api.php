@@ -33,6 +33,7 @@ Route::get('/company/{id}/token/update', [CompanyController::class,  'updateToke
 
 Route::get('/company/test-cron', [CompanyController::class,  'testCronJob']);
 Route::get('/company/test-company-down-cron', [CompanyController::class,  'testCompanyDownCronJob']);
+Route::post('/company/check-renew-verification-code', [CompanyController::class,  'checkCompanyVerificationCode']);
 
 //Requisition Route
 Route::get('/requisition/list', [RequisitionController::class, 'getRequisitionList']);

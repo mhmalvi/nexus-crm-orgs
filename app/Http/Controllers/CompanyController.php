@@ -404,6 +404,10 @@ class CompanyController extends Controller
 
             $companies = Company::find($request->company_id);
             $companies->active = $request->active;
+            if($request->active==1){
+                $companies->package_renew_code = '';
+            }
+
             $companies->save();
 
             $companyEmployee = CompanySalesEmployee::select('*');
@@ -432,6 +436,7 @@ class CompanyController extends Controller
                 'users' => json_encode($salesUserIds),
                 'suspend' => $suspend
             ]);
+
              //dd(json_decode($response->body()));
             // dd(json_decode($response->body()));
 
@@ -458,6 +463,65 @@ class CompanyController extends Controller
         }
     }
 
+    /**
+     * Company Renew Code verification
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkCompanyVerificationCode(Request $request)
+    {
+        if(!isset($request->package_renew_code))
+            return response()->json([
+                'status' => false,
+                'message' => 'Verification Code Needed',
+            ], 401);
+
+
+
+        try {
+           // $companies = Company::where('package_renew_code', $request->package_renew_code)->first();
+            $company = Company::select('companies.id as cid',
+                'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
+                'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
+                'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
+                'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
+                'companies.business_type as business_type', 'companies.active as active',
+                'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
+                'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+                ->leftJoin('com_subscription', function ($join) {
+                    $join->on('companies.id', '=', 'com_subscription.company_id')->where('com_subscription.active', '=', 1);
+                })
+                ->leftJoin('packages', function ($join) {
+                    $join->on('com_subscription.subscription_id', '=', 'packages.id');
+                })
+                ->where('companies.package_renew_code', $request->package_renew_code)
+                //->where('companies.active', 1)
+                //->where('lead_details.client_id', '=', $request->client_id)
+                ->get();
+
+
+            if($company==""){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data not found',
+                ], 401);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Company details',
+                'data'    => $company->toArray()
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
     public function testCronJob(Request $request){
 
         $company = Company::select('companies.id as cid',
@@ -465,7 +529,7 @@ class CompanyController extends Controller
             'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
             'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
             'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
-            'companies.business_type as business_type', 'companies.active as active',
+            'companies.business_type as business_type', 'companies.active as active', 'companies.package_renew_code as package_renew_code',
             'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
             'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
             ->join('com_subscription', function ($join) {
@@ -491,8 +555,10 @@ class CompanyController extends Controller
                 if($row->package_date!=""){
                     $endDate= Carbon::parse($row->package_date)->addDays($row->package_type_limit);
                     $today = Carbon::parse(now());
+                    //dd($endDate);
 
                      $action = $today->lte($endDate);
+
                     if($action){
 
                         $sevenDays = Carbon::parse($endDate)->addDays(-7);
@@ -500,8 +566,9 @@ class CompanyController extends Controller
                         $twoDays = Carbon::parse($endDate)->addDays(-2);
                         //dd($sevenDays. '==>'. $tenDays. '==>' .$twoDays)->format('Y.m.d');
                         //dd($twoDays->isCurrentDay());
-
+                        //dd($twoDays);
                         if($sevenDays->isCurrentDay() || $tenDays->isCurrentDay() || $twoDays->isCurrentDay() ){
+
                             if($twoDays->isCurrentDay()){
                                 $subject = 'Reminder!! 2 days to go';
                                 $remainDays = '2';
@@ -516,6 +583,7 @@ class CompanyController extends Controller
                             }
                             // User Details
                             if($row->admin>0){
+
 
                                 $userServiceAPI = env('USER_SERVICE_API', '');
                                 //dd($userServiceAPI);
@@ -541,11 +609,25 @@ class CompanyController extends Controller
                                     ]);
                                     //dd( json_decode($response->body()));
                                 }
+                                // Generate Renew Code //
+                                //$row->package_date =$this->_randomPassword();
+                                $companies = Company::find($row->cid);
+
+                                if($companies->package_renew_code==""){
+                                    $companies->package_renew_code = $this->_randomPassword();
+                                    $companies->save();
+                                }
+
+                                //$companies->save();
 
                             }
 
                           //dd($row);
                           // Email for Reminder notification
+                          // Generate Expire code
+
+
+                          // EOF
                         }
                     }
                 }
@@ -558,8 +640,7 @@ class CompanyController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Company Token Update Successfully',
-            'data'    => $company->toArray()
+            'message' => 'Company Reminder Notification Successfully'
         ], 201);
 
     }
@@ -610,8 +691,12 @@ class CompanyController extends Controller
 
                                 $companies = Company::find($row->cid);
                                 $companies->active = 0;
-                                $companies->save();
 
+                                if($companies->package_renew_code==""){
+                                    $companies->package_renew_code = $this->_randomPassword();
+                                }
+
+                                $companies->save();
                                 $companyEmployee = CompanySalesEmployee::select('*');
                                 $companyEmployee =$companyEmployee->where('company_id',$row->cid);
                                 $companyEmployee = $companyEmployee->get();
@@ -678,6 +763,23 @@ class CompanyController extends Controller
         ], 201);
 
     }
+
+    /**
+     * Random Password generate
+     * @param Request void
+     * @return 8 character password
+     */
+    private function _randomPassword() {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'.time();
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass); //turn the array into a string
+    }
+
 
 
 //    public function cusfile(Request $request)
