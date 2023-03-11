@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanySalesTeamController;
+use App\Http\Controllers\FileServerController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageSubscriptionController;
 use App\Http\Controllers\RequisitionController;
@@ -64,3 +65,8 @@ Route::get('delete/subscription/{id}/{user_id}', [SubscriptionController::class,
 
 //dummy
 Route::post('/file', [CompanyController::class, 'cusfile']);
+
+
+Route::post('/documents',[FileServerController::class,'store']);
+Route::get('/documents/{id}', [FileServerController::class, 'show']);
+Route::get('/documents-delete/{id}', [FileServerController::class, 'destroy']);

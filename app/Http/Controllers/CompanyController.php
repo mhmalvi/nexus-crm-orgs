@@ -97,15 +97,7 @@ class CompanyController extends Controller
     {
 
         //validation for all input
-        $request->validate([
-            'name' => 'required',
-            'contact' => 'required',
-            'business_email' => 'required',
-            'website' => 'required',
-            'fb_ac_credential' => 'required',
-            'secret_key' => 'required',
-
-        ]);
+        $request->validate([]);
 
         try {
 
