@@ -47,11 +47,12 @@ class FileServerController extends Controller
             
         }
         $save = $file_system->save();
+        // dd($file_system);
         if ($save) {
             return response()->json([
                 'message' => 'success',
                 'status' => 200,
-                'data' => $fileName
+                'data' => $file_system
             ],200);
         }else{
             return response()->json([
