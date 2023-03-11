@@ -23,17 +23,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //Company Route
-Route::post('/store/company/', [CompanyController::class,  'store']);
-Route::post('/update/company/', [CompanyController::class,  'update']);
+Route::post('/company/create', [CompanyController::class,  'store']);
+Route::get('/company/{id}/details', [CompanyController::class, 'getCompanyByCompanyId']);
+Route::put('/company/update', [CompanyController::class,  'update']);
 Route::get('/delete/company/{id}/{user_id}', [CompanyController::class,  'destroy']);
+Route::post('/company/list', [CompanyController::class,  'getCompanyList']);
+Route::post('/company/details/user', [CompanyController::class, 'getCompanyByUser']);
+Route::post('/company/status', [CompanyController::class, 'companyStatus']);
+Route::get('/company/{id}/token/update', [CompanyController::class,  'updateTokenByCompanyId']);
 
+Route::get('/company/test-cron', [CompanyController::class,  'testCronJob']);
+Route::get('/company/test-company-down-cron', [CompanyController::class,  'testCompanyDownCronJob']);
+Route::post('/company/check-renew-verification-code', [CompanyController::class,  'checkCompanyVerificationCode']);
 
 //Requisition Route
+Route::get('/requisition/list', [RequisitionController::class, 'getRequisitionList']);
 Route::post('/store/requisition', [RequisitionController::class, 'store']);
 Route::post('/update/status/requisition', [RequisitionController::class, 'updateRequisition']);
 
 
+
 //Company Sales Team Route
+Route::get('/company/{company_id}/employee/list', [CompanySalesTeamController::class,  'index']);
+Route::post('/company/employee/create', [CompanySalesTeamController::class,  'create']);
 Route::post('/update/sales/team', [CompanySalesTeamController::class, 'update']);
 Route::get('/delete/sales/team/{id}/{user_id}', [CompanySalesTeamController::class, 'destroy']);
 
@@ -62,6 +74,11 @@ Route::post('store/subscription', [SubscriptionController::class, 'store']);
 Route::post('update/subscription', [SubscriptionController::class, 'update']);
 Route::get('delete/subscription/{id}/{user_id}', [SubscriptionController::class, 'destroy']);
 
+//Notice Route
+Route::post('notice/list', [\App\Http\Controllers\NoticeController::class, 'index']);
+Route::post('notice/create', [\App\Http\Controllers\NoticeController::class, 'create']);
+Route::put('notice/{id}/update', [\App\Http\Controllers\NoticeController::class, 'update']);
+Route::delete('notice/{id}/delete', [\App\Http\Controllers\NoticeController::class, 'delete']);
 
 //dummy
 Route::post('/file', [CompanyController::class, 'cusfile']);

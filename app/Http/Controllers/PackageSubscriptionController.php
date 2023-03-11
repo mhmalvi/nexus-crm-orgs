@@ -33,7 +33,7 @@ class PackageSubscriptionController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -81,7 +81,7 @@ class PackageSubscriptionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\PackageSubscription  $packageSubscription
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, PackageSubscription $packageSubscription)
     {
@@ -128,12 +128,12 @@ class PackageSubscriptionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\PackageSubscription  $packageSubscription
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(PackageSubscription $packageSubscription, $id, $user_id)
     {
         try {
-            //delete the company 
+            //delete the company
             $delete = DB::table('package_subscriptions')->where('id', $id)
                 ->update(
                     [

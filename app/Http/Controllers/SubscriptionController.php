@@ -13,7 +13,7 @@ class SubscriptionController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -61,7 +61,7 @@ class SubscriptionController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Subscription  $subscription
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Subscription $subscription)
     {
@@ -79,7 +79,7 @@ class SubscriptionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Subscription  $subscription
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Subscription $subscription)
     {
@@ -128,12 +128,12 @@ class SubscriptionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Subscription  $subscription
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Subscription $subscription, $id, $user_id)
     {
         try {
-            //delete the company 
+            //delete the company
             $delete = DB::table('subscriptions')->where('id', $id)
                 ->update(
                     [
