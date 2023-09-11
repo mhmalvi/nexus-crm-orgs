@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\CompanySalesEmployee;
 use App\Models\CompanySubscription;
+use App\Models\FileServer;
 use Carbon\Carbon;
 use Illuminate\Database\DBAL\TimestampType;
 use Illuminate\Http\Request;
@@ -24,12 +25,12 @@ class CompanyController extends Controller
     {
         try {
             $companyList = Company::select('*');
-            if(isset($request->id))
-                $companyList =$companyList->where('id',$request->id);
+            if (isset($request->id))
+                $companyList = $companyList->where('id', $request->id);
             //$companyList =$companyList->where('active',1);
             $companyList = $companyList->get();
             // dd($companyList);
-            if($companyList==""){
+            if ($companyList == "") {
                 return response()->json([
                     'status' => false,
                     'message' => 'Company not found',
@@ -41,7 +42,6 @@ class CompanyController extends Controller
                 'message' => 'All Company',
                 'data'    => $companyList->toArray()
             ], 201);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -73,32 +73,32 @@ class CompanyController extends Controller
             $company = Company::updateOrcreate([
                 'name' => $request->name,
                 'description' => $request->description,
-                'logo_id' => isset($request->logo_id)?$request->logo_id:'',
+                'logo_id' => isset($request->logo_id) ? $request->logo_id : '',
                 'contact' => $request->contact,
                 'business_email' => $request->business_email,
-                'address' => isset($request->address)?$request->address:'',
-                'abn' => isset($request->abn)?$request->abn:'',
-                'website' => isset($request->website)?$request->website:'',
-                'trading_name' => isset($request->trading_name)?$request->trading_name:'',
-                'rto_code' => isset($request->rto_code)?$request->rto_code:'',
-                'country_name' => isset($request->country_name)?$request->country_name:'',
-                'admin' =>  isset($request->admin)?$request->admin:0,
-                'super_admin' =>  isset($request->superAdmin)?$request->superAdmin:0,
-                'app_id' => isset($request->app_id)?$request->app_id:'',
-                'fb_ac_credential' => isset($request->fb_ac_credential)?$request->fb_ac_credential:'',
-                'secret_key' => isset($request->secret_key)?$request->secret_key:'',
-                'business_type' => isset($request->business_type)?$request->business_type:1
+                'address' => isset($request->address) ? $request->address : '',
+                'abn' => isset($request->abn) ? $request->abn : '',
+                'website' => isset($request->website) ? $request->website : '',
+                'trading_name' => isset($request->trading_name) ? $request->trading_name : '',
+                'rto_code' => isset($request->rto_code) ? $request->rto_code : '',
+                'country_name' => isset($request->country_name) ? $request->country_name : '',
+                'admin' =>  isset($request->admin) ? $request->admin : 0,
+                'super_admin' =>  isset($request->superAdmin) ? $request->superAdmin : 0,
+                'app_id' => isset($request->app_id) ? $request->app_id : '',
+                'fb_ac_credential' => isset($request->fb_ac_credential) ? $request->fb_ac_credential : '',
+                'secret_key' => isset($request->secret_key) ? $request->secret_key : '',
+                'business_type' => isset($request->business_type) ? $request->business_type : 1
             ]);
 
             CompanySubscription::updateOrcreate([
                 'company_id' => $company->id,
-                'subscription_id' => isset($request->subscription_id)?$request->subscription_id:0,
+                'subscription_id' => isset($request->subscription_id) ? $request->subscription_id : 0,
                 'active' => 1
             ]);
 
             CompanySalesEmployee::updateOrcreate([
                 'company_id' => $company->id,
-                'user_id' => isset($request->admin)?$request->admin:0
+                'user_id' => isset($request->admin) ? $request->admin : 0
             ])->toArray();
             DB::commit();
             //create a company subscription row according to company id, initially it must be null
@@ -134,7 +134,7 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company)
     {
 
-        if(!isset($request->id))
+        if (!isset($request->id))
             return response()->json([
                 'status' => false,
                 'message' => 'Id not found',
@@ -228,34 +228,34 @@ class CompanyController extends Controller
      */
     public function getCompanyByUser(Request $request)
     {
-        if(!isset($request->user_id) || !isset($request->role_id))
+        if (!isset($request->user_id) || !isset($request->role_id))
             return response()->json([
                 'status' => false,
                 'message' => 'User not found',
             ], 401);
 
         try {
-            if($request->role_id==3){ // If Admin
+            if ($request->role_id == 3) { // If Admin
                 $company = Company::select('*');
-                $company =$company->where('admin',$request->user_id)->where('active', 1);
+                $company = $company->where('admin', $request->user_id)->where('active', 1);
                 $company = $company->first();
-            }else{
+            } else {
                 $company = Company::join('company_sales_employee', function ($join) {
                     $join->on('company_sales_employee.company_id', '=', 'companies.id');
                 })->where('company_sales_employee.user_id', $request->user_id)
                     //->where('companies.active', 1)
                     //->where('lead_details.client_id', '=', $request->client_id)
-                ->first();
+                    ->first();
             }
             // dd($company->toArray());
-            if($company==""){
+            if ($company == "") {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data not found',
                 ], 401);
             }
 
-            if($request->role_id==3){ // If Admin
+            if ($request->role_id == 3) { // If Admin
                 $company->company_id = $company->id;
             }
             return response()->json([
@@ -263,13 +263,21 @@ class CompanyController extends Controller
                 'message' => 'Company details',
                 'data'    => $company->toArray()
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function company_id(Request $request)
+    {
+        dd($request->all());
+        $company_id = Company::select('id')->where('abn', $request->abn)->first();
+        return $company_id;
+        // dd(json_encode($company_id->id));
+        // HTTP::get('http://localhost:8002/api/send-company-id',['company_id'=> $company_id->id]);
     }
 
     /**
@@ -279,7 +287,7 @@ class CompanyController extends Controller
      */
     public function getCompanyByCompanyId(Request $request)
     {
-        if(!isset($request->id))
+        if (!isset($request->id))
             return response()->json([
                 'status' => false,
                 'message' => 'Company not found',
@@ -288,14 +296,37 @@ class CompanyController extends Controller
         try {
 
             //$company = Company::find($request->id);
-            $company = Company::select('companies.id as cid',
-                'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
-                'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
-                'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
-                'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
-                'companies.business_type as business_type', 'companies.active as active',
-                'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
-                'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+            $company = Company::select(
+                'companies.id as cid',
+                'companies.name as name',
+                'companies.connect_id as connect',
+                'companies.description as description',
+                'companies.logo_id as logo_id',
+                'companies.contact as contact',
+                'companies.business_email as business_email',
+                'companies.address as address',
+                'companies.abn as abn',
+                'companies.website as website',
+                'companies.trading_name as trading_name',
+                'companies.rto_code as rto_code',
+                'companies.country_name as country_name',
+                'companies.admin as admin',
+                'companies.fb_ac_credential as fb_ac_credential',
+                'companies.app_id as app_id',
+                'companies.scrapped_time as scrapped_time',
+                'companies.secret_key as secret_key',
+                'companies.form as form',
+                'companies.business_type as business_type',
+                'companies.active as active',
+                'packages.id as pid',
+                'packages.package_name as package_name',
+                'packages.package_type as package_type',
+                'packages.package_type_limit as package_type_limit',
+                'packages.package_details as package_details',
+                'packages.price as price',
+                'com_subscription.created_at as package_date',
+                'com_subscription.active as package_status'
+            )
                 ->leftJoin('com_subscription', function ($join) {
                     $join->on('companies.id', '=', 'com_subscription.company_id')->where('com_subscription.active', '=', 1);
                 })
@@ -307,8 +338,8 @@ class CompanyController extends Controller
                 //->where('lead_details.client_id', '=', $request->client_id)
                 ->get();
 
-             //dd($company->toArray());
-            if($company==""){
+            //dd($company->toArray());
+            if ($company == "") {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data not found',
@@ -320,13 +351,19 @@ class CompanyController extends Controller
                 'message' => 'Company details',
                 'data'    => $company->toArray()
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function company_logo($id){
+        // dd($id);
+        $company_logo = Company::find($id);
+        // dd($company_logo);
+        $logo = FileServer::find($company_logo->)
     }
 
 
@@ -337,7 +374,7 @@ class CompanyController extends Controller
      */
     public function updateTokenByCompanyId(Request $request)
     {
-        if(!isset($request->id))
+        if (!isset($request->id))
             return response()->json([
                 'status' => false,
                 'message' => 'Company not found',
@@ -345,10 +382,10 @@ class CompanyController extends Controller
 
         try {
 
-            $company = Company::find( $request->id);
+            $company = Company::find($request->id);
 
             //dd($company->toArray());
-            if($company==""){
+            if ($company == "") {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data not found',
@@ -358,18 +395,18 @@ class CompanyController extends Controller
             $fbToken = $company->fb_ac_credential;
             $secretKey = $company->secret_key;
 
-            $url = "https://graph.facebook.com/v15.0/oauth/access_token?grant_type=fb_exchange_token&client_id=".$appId."&client_secret=".$secretKey."&fb_exchange_token=".$fbToken;
+            $url = "https://graph.facebook.com/v15.0/oauth/access_token?grant_type=fb_exchange_token&client_id=" . $appId . "&client_secret=" . $secretKey . "&fb_exchange_token=" . $fbToken;
             $dataArray = json_decode(file_get_contents($url), true);
 
-            if( $dataArray!="" && count($dataArray)>0 && isset($dataArray['access_token'])){
+            if ($dataArray != "" && count($dataArray) > 0 && isset($dataArray['access_token'])) {
 
                 $company->fb_ac_credential = $dataArray['access_token'];
                 $company->save();
                 //dd($dataArray['access_token']);
-//                $company = Company::where('id', $request->id)
-//                    ->update([
-//                        'fb_ac_credential' => $dataArray['access_token']
-//                    ]);
+                //                $company = Company::where('id', $request->id)
+                //                    ->update([
+                //                        'fb_ac_credential' => $dataArray['access_token']
+                //                    ]);
             }
 
             return response()->json([
@@ -377,7 +414,6 @@ class CompanyController extends Controller
                 'message' => 'Company Token Update Successfully',
                 'data'    => $company->toArray()
             ], 201);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -393,7 +429,7 @@ class CompanyController extends Controller
      */
     public function companyStatus(Request $request)
     {
-        if(!isset($request->company_id) || !isset($request->active))
+        if (!isset($request->company_id) || !isset($request->active))
             return response()->json([
                 'status' => false,
                 'message' => 'Company Id not found',
@@ -404,17 +440,17 @@ class CompanyController extends Controller
 
             $companies = Company::find($request->company_id);
             $companies->active = $request->active;
-            if($request->active==1){
+            if ($request->active == 1) {
                 $companies->package_renew_code = '';
             }
 
             $companies->save();
 
             $companyEmployee = CompanySalesEmployee::select('*');
-            $companyEmployee =$companyEmployee->where('company_id',$request->company_id);
+            $companyEmployee = $companyEmployee->where('company_id', $request->company_id);
             $companyEmployee = $companyEmployee->get();
             //dd($companyEmployee);
-            if($companyEmployee==""){
+            if ($companyEmployee == "") {
                 return response()->json([
                     'status' => false,
                     'message' => 'Sales Employee not found',
@@ -422,30 +458,30 @@ class CompanyController extends Controller
             }
 
             $salesUserIds = [];
-            $temp=[];
-            foreach ($companyEmployee->toArray() as $value){
-                $salesUserIds[]['id']=$value['user_id'];
+            $temp = [];
+            foreach ($companyEmployee->toArray() as $value) {
+                $salesUserIds[]['id'] = $value['user_id'];
             }
             //array_push($salesUserIds, $temp);
             //dd(json_encode($salesUserIds));
 
             $userServiceAPI = env('USER_SERVICE_API', '');
             //dd(json_encode($salesUserIds));
-            $suspend  = ($request->active==1)?0:1;
-            $response = Http::post($userServiceAPI.'/user/suspend', [
+            $suspend  = ($request->active == 1) ? 0 : 1;
+            $response = Http::post($userServiceAPI . '/user/suspend', [
                 'users' => json_encode($salesUserIds),
                 'suspend' => $suspend
             ]);
 
-             //dd(json_decode($response->body()));
+            //dd(json_decode($response->body()));
             // dd(json_decode($response->body()));
 
-//            if($response->status()!= '201'){
-//                return response()->json([
-//                    'status' => false,
-//                    'message' => 'User Data not found',
-//                ], 401);
-//            }
+            //            if($response->status()!= '201'){
+            //                return response()->json([
+            //                    'status' => false,
+            //                    'message' => 'User Data not found',
+            //                ], 401);
+            //            }
 
             //dd(json_decode($response->body()));
 
@@ -454,7 +490,6 @@ class CompanyController extends Controller
                 'message' => 'Status Update Successfully',
                 //'data'    => isset(json_decode($response->body())->data)?json_decode($response->body())->data:''
             ], 201);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -470,7 +505,7 @@ class CompanyController extends Controller
      */
     public function checkCompanyVerificationCode(Request $request)
     {
-        if(!isset($request->package_renew_code))
+        if (!isset($request->package_renew_code))
             return response()->json([
                 'status' => false,
                 'message' => 'Verification Code Needed',
@@ -479,15 +514,36 @@ class CompanyController extends Controller
 
 
         try {
-           // $companies = Company::where('package_renew_code', $request->package_renew_code)->first();
-            $company = Company::select('companies.id as cid',
-                'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
-                'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
-                'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
-                'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
-                'companies.business_type as business_type', 'companies.active as active',
-                'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
-                'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+            // $companies = Company::where('package_renew_code', $request->package_renew_code)->first();
+            $company = Company::select(
+                'companies.id as cid',
+                'companies.name as name',
+                'companies.description as description',
+                'companies.logo_id as logo_id',
+                'companies.contact as contact',
+                'companies.business_email as business_email',
+                'companies.address as address',
+                'companies.abn as abn',
+                'companies.website as website',
+                'companies.trading_name as trading_name',
+                'companies.rto_code as rto_code',
+                'companies.country_name as country_name',
+                'companies.admin as admin',
+                'companies.fb_ac_credential as fb_ac_credential',
+                'companies.app_id as app_id',
+                'companies.secret_key as secret_key',
+                'companies.form as form',
+                'companies.business_type as business_type',
+                'companies.active as active',
+                'packages.id as pid',
+                'packages.package_name as package_name',
+                'packages.package_type as package_type',
+                'packages.package_type_limit as package_type_limit',
+                'packages.package_details as package_details',
+                'packages.price as price',
+                'com_subscription.created_at as package_date',
+                'com_subscription.active as package_status'
+            )
                 ->leftJoin('com_subscription', function ($join) {
                     $join->on('companies.id', '=', 'com_subscription.company_id')->where('com_subscription.active', '=', 1);
                 })
@@ -500,7 +556,7 @@ class CompanyController extends Controller
                 ->get();
 
 
-            if($company==""){
+            if ($company == "") {
                 return response()->json([
                     'status' => false,
                     'message' => 'Data not found',
@@ -512,7 +568,6 @@ class CompanyController extends Controller
                 'message' => 'Company details',
                 'data'    => $company->toArray()
             ], 200);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -522,16 +577,39 @@ class CompanyController extends Controller
     }
 
 
-    public function testCronJob(Request $request){
+    public function testCronJob(Request $request)
+    {
 
-        $company = Company::select('companies.id as cid',
-            'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
-            'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
-            'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
-            'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
-            'companies.business_type as business_type', 'companies.active as active', 'companies.package_renew_code as package_renew_code',
-            'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
-            'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+        $company = Company::select(
+            'companies.id as cid',
+            'companies.name as name',
+            'companies.description as description',
+            'companies.logo_id as logo_id',
+            'companies.contact as contact',
+            'companies.business_email as business_email',
+            'companies.address as address',
+            'companies.abn as abn',
+            'companies.website as website',
+            'companies.trading_name as trading_name',
+            'companies.rto_code as rto_code',
+            'companies.country_name as country_name',
+            'companies.admin as admin',
+            'companies.fb_ac_credential as fb_ac_credential',
+            'companies.app_id as app_id',
+            'companies.secret_key as secret_key',
+            'companies.form as form',
+            'companies.business_type as business_type',
+            'companies.active as active',
+            'companies.package_renew_code as package_renew_code',
+            'packages.id as pid',
+            'packages.package_name as package_name',
+            'packages.package_type as package_type',
+            'packages.package_type_limit as package_type_limit',
+            'packages.package_details as package_details',
+            'packages.price as price',
+            'com_subscription.created_at as package_date',
+            'com_subscription.active as package_status'
+        )
             ->join('com_subscription', function ($join) {
                 $join->on('companies.id', '=', 'com_subscription.company_id');
             })
@@ -548,18 +626,18 @@ class CompanyController extends Controller
         $data = '';
         $subject = '';
         $remainDays = '';
-        if($company!=""){
+        if ($company != "") {
 
-            foreach ($company as $row){
+            foreach ($company as $row) {
                 $packageStartTime = $row->package_date;
-                if($row->package_date!=""){
-                    $endDate= Carbon::parse($row->package_date)->addDays($row->package_type_limit);
+                if ($row->package_date != "") {
+                    $endDate = Carbon::parse($row->package_date)->addDays($row->package_type_limit);
                     $today = Carbon::parse(now());
                     //dd($endDate);
 
-                     $action = $today->lte($endDate);
+                    $action = $today->lte($endDate);
 
-                    if($action){
+                    if ($action) {
 
                         $sevenDays = Carbon::parse($endDate)->addDays(-7);
                         $tenDays = Carbon::parse($endDate)->addDays(-10);
@@ -567,44 +645,44 @@ class CompanyController extends Controller
                         //dd($sevenDays. '==>'. $tenDays. '==>' .$twoDays)->format('Y.m.d');
                         //dd($twoDays->isCurrentDay());
                         //dd($twoDays);
-                        if($sevenDays->isCurrentDay() || $tenDays->isCurrentDay() || $twoDays->isCurrentDay() ){
+                        if ($sevenDays->isCurrentDay() || $tenDays->isCurrentDay() || $twoDays->isCurrentDay()) {
 
-                            if($twoDays->isCurrentDay()){
+                            if ($twoDays->isCurrentDay()) {
                                 $subject = 'Reminder!! 2 days to go';
                                 $remainDays = '2';
                             }
-                            if($sevenDays->isCurrentDay()){
+                            if ($sevenDays->isCurrentDay()) {
                                 $subject = 'Reminder!! 7 to go';
                                 $remainDays = '7';
                             }
-                            if($tenDays->isCurrentDay()){
+                            if ($tenDays->isCurrentDay()) {
                                 $subject = 'Reminder!! 10 to go';
                                 $remainDays = '10';
                             }
                             // User Details
-                            if($row->admin>0){
+                            if ($row->admin > 0) {
 
 
                                 $userServiceAPI = env('USER_SERVICE_API', '');
                                 //dd($userServiceAPI);
-                                $response = Http::post($userServiceAPI.'/user/list', [
+                                $response = Http::post($userServiceAPI . '/user/list', [
                                     'users' => json_encode(array($row->admin))
                                 ]);
 
                                 $userDetailsData = json_decode($response->body());
-                                $userDetails= isset($userDetailsData->data[0])?$userDetailsData->data[0]:'';
+                                $userDetails = isset($userDetailsData->data[0]) ? $userDetailsData->data[0] : '';
                                 //dd($userDetails);
                                 //send response
-                                if($userDetails!=""){
+                                if ($userDetails != "") {
                                     $emailServiceAPI = env('EMAIL_SERVICE_API', '');
-                                    $infoData =[
+                                    $infoData = [
                                         'user_details' => $userDetails,
                                         'company_details' => $row,
                                         'subject'        => $subject,
                                         'remainDays'   => $remainDays
                                     ];
                                     //dd($invoiceData);
-                                    $response = Http::post($emailServiceAPI.'/reminder', [
+                                    $response = Http::post($emailServiceAPI . '/reminder', [
                                         'data' => json_encode($infoData)
                                     ]);
                                     //dd( json_decode($response->body()));
@@ -613,7 +691,7 @@ class CompanyController extends Controller
                                 //$row->package_date =$this->_randomPassword();
                                 $companies = Company::find($row->cid);
 
-                                if($companies->package_renew_code==""){
+                                if ($companies->package_renew_code == "") {
                                     $companies->package_renew_code = $this->_randomPassword();
                                     $companies->save();
                                 }
@@ -622,12 +700,12 @@ class CompanyController extends Controller
 
                             }
 
-                          //dd($row);
-                          // Email for Reminder notification
-                          // Generate Expire code
+                            //dd($row);
+                            // Email for Reminder notification
+                            // Generate Expire code
 
 
-                          // EOF
+                            // EOF
                         }
                     }
                 }
@@ -635,26 +713,46 @@ class CompanyController extends Controller
                 //$packageEndTime =
                 //dd($packageStartTime);
             }
-
         }
 
         return response()->json([
             'status' => true,
             'message' => 'Company Reminder Notification Successfully'
         ], 201);
-
     }
 
-    public function testCompanyDownCronJob(Request $request){
+    public function testCompanyDownCronJob(Request $request)
+    {
 
-        $company = Company::select('companies.id as cid',
-            'companies.name as name', 'companies.description as description', 'companies.logo_id as logo_id', 'companies.contact as contact',
-            'companies.business_email as business_email', 'companies.address as address', 'companies.abn as abn', 'companies.website as website',
-            'companies.trading_name as trading_name', 'companies.rto_code as rto_code', 'companies.country_name as country_name', 'companies.admin as admin',
-            'companies.fb_ac_credential as fb_ac_credential', 'companies.app_id as app_id', 'companies.secret_key as secret_key', 'companies.form as form',
-            'companies.business_type as business_type', 'companies.active as active',
-            'packages.id as pid', 'packages.package_name as package_name', 'packages.package_type as package_type', 'packages.package_type_limit as package_type_limit',
-            'packages.package_details as package_details', 'packages.price as price', 'com_subscription.created_at as package_date', 'com_subscription.active as package_status')
+        $company = Company::select(
+            'companies.id as cid',
+            'companies.name as name',
+            'companies.description as description',
+            'companies.logo_id as logo_id',
+            'companies.contact as contact',
+            'companies.business_email as business_email',
+            'companies.address as address',
+            'companies.abn as abn',
+            'companies.website as website',
+            'companies.trading_name as trading_name',
+            'companies.rto_code as rto_code',
+            'companies.country_name as country_name',
+            'companies.admin as admin',
+            'companies.fb_ac_credential as fb_ac_credential',
+            'companies.app_id as app_id',
+            'companies.secret_key as secret_key',
+            'companies.form as form',
+            'companies.business_type as business_type',
+            'companies.active as active',
+            'packages.id as pid',
+            'packages.package_name as package_name',
+            'packages.package_type as package_type',
+            'packages.package_type_limit as package_type_limit',
+            'packages.package_details as package_details',
+            'packages.price as price',
+            'com_subscription.created_at as package_date',
+            'com_subscription.active as package_status'
+        )
             ->join('com_subscription', function ($join) {
                 $join->on('companies.id', '=', 'com_subscription.company_id');
             })
@@ -671,89 +769,86 @@ class CompanyController extends Controller
         $data = '';
         $subject = '';
         $remainDays = '';
-        if($company!=""){
+        if ($company != "") {
 
-            foreach ($company as $row){
+            foreach ($company as $row) {
                 $packageStartTime = $row->package_date;
-                if($row->package_date!=""){
-                    $endDate= Carbon::parse($row->package_date)->addDays($row->package_type_limit);
+                if ($row->package_date != "") {
+                    $endDate = Carbon::parse($row->package_date)->addDays($row->package_type_limit);
 
-                    if($endDate->isCurrentDay()){
+                    if ($endDate->isCurrentDay()) {
 
                         //dd($row);
 
                         $subject = 'Subscription expiration';
 
-                            // User Details
-                            if($row->admin>0){
+                        // User Details
+                        if ($row->admin > 0) {
 
-                                ///////////Company Inactive //
+                            ///////////Company Inactive //
 
-                                $companies = Company::find($row->cid);
-                                $companies->active = 0;
+                            $companies = Company::find($row->cid);
+                            $companies->active = 0;
 
-                                if($companies->package_renew_code==""){
-                                    $companies->package_renew_code = $this->_randomPassword();
-                                }
-
-                                $companies->save();
-                                $companyEmployee = CompanySalesEmployee::select('*');
-                                $companyEmployee =$companyEmployee->where('company_id',$row->cid);
-                                $companyEmployee = $companyEmployee->get();
-                                //dd($companyEmployee);
-                                $salesUserIds = [];
-
-                                if($companyEmployee!=""){
-                                    foreach ($companyEmployee->toArray() as $value){
-                                        $salesUserIds[]['id']=$value['user_id'];
-                                    }
-                                    $userServiceAPI = env('USER_SERVICE_API', '');
-                                    //dd(json_encode($salesUserIds));
-                                    $suspend  = ($request->active==1)?0:1;
-                                    Http::post($userServiceAPI.'/user/suspend', [
-                                        'users' => json_encode($salesUserIds),
-                                        'suspend' => $suspend
-                                    ]);
-                                }
-
-                                //// EOF Company Inactive
-
-                                $userServiceAPI = env('USER_SERVICE_API', '');
-                                //dd($userServiceAPI);
-                                $response = Http::post($userServiceAPI.'/user/list', [
-                                    'users' => json_encode(array($row->admin))
-                                ]);
-
-                                $userDetailsData = json_decode($response->body());
-                                $userDetails= isset($userDetailsData->data[0])?$userDetailsData->data[0]:'';
-                                //dd($userDetails);
-                                //send response
-                                if($userDetails!=""){
-                                    $emailServiceAPI = env('EMAIL_SERVICE_API', '');
-                                    $infoData =[
-                                        'user_details' => $userDetails,
-                                        'company_details' => $row,
-                                        'subject'        => $subject
-                                    ];
-                                    //dd($invoiceData);
-                                    $response = Http::post($emailServiceAPI.'/subscription-expired', [
-                                        'data' => json_encode($infoData)
-                                    ]);
-                                    //dd( json_decode($response->body()));
-                                }
-
+                            if ($companies->package_renew_code == "") {
+                                $companies->package_renew_code = $this->_randomPassword();
                             }
 
-                            //dd($row);
-                            // Email for Reminder notification
+                            $companies->save();
+                            $companyEmployee = CompanySalesEmployee::select('*');
+                            $companyEmployee = $companyEmployee->where('company_id', $row->cid);
+                            $companyEmployee = $companyEmployee->get();
+                            //dd($companyEmployee);
+                            $salesUserIds = [];
+
+                            if ($companyEmployee != "") {
+                                foreach ($companyEmployee->toArray() as $value) {
+                                    $salesUserIds[]['id'] = $value['user_id'];
+                                }
+                                $userServiceAPI = env('USER_SERVICE_API', '');
+                                //dd(json_encode($salesUserIds));
+                                $suspend  = ($request->active == 1) ? 0 : 1;
+                                Http::post($userServiceAPI . '/user/suspend', [
+                                    'users' => json_encode($salesUserIds),
+                                    'suspend' => $suspend
+                                ]);
+                            }
+
+                            //// EOF Company Inactive
+
+                            $userServiceAPI = env('USER_SERVICE_API', '');
+                            //dd($userServiceAPI);
+                            $response = Http::post($userServiceAPI . '/user/list', [
+                                'users' => json_encode(array($row->admin))
+                            ]);
+
+                            $userDetailsData = json_decode($response->body());
+                            $userDetails = isset($userDetailsData->data[0]) ? $userDetailsData->data[0] : '';
+                            //dd($userDetails);
+                            //send response
+                            if ($userDetails != "") {
+                                $emailServiceAPI = env('EMAIL_SERVICE_API', '');
+                                $infoData = [
+                                    'user_details' => $userDetails,
+                                    'company_details' => $row,
+                                    'subject'        => $subject
+                                ];
+                                //dd($invoiceData);
+                                $response = Http::post($emailServiceAPI . '/subscription-expired', [
+                                    'data' => json_encode($infoData)
+                                ]);
+                                //dd( json_decode($response->body()));
+                            }
                         }
 
+                        //dd($row);
+                        // Email for Reminder notification
+                    }
                 }
 
                 //$packageEndTime =
                 //dd($packageStartTime);
             }
-
         }
 
         return response()->json([
@@ -761,7 +856,6 @@ class CompanyController extends Controller
             'message' => 'Company Token Update Successfully',
             'data'    => $company->toArray()
         ], 201);
-
     }
 
     /**
@@ -769,8 +863,9 @@ class CompanyController extends Controller
      * @param Request void
      * @return 8 character password
      */
-    private function _randomPassword() {
-        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'.time();
+    private function _randomPassword()
+    {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890' . time();
         $pass = array(); //remember to declare $pass as an array
         $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
         for ($i = 0; $i < 8; $i++) {
@@ -782,16 +877,16 @@ class CompanyController extends Controller
 
 
 
-//    public function cusfile(Request $request)
-//    {
-//
-//        return $request->all();
-//
-//        return response()->json([
-//
-//            'logo_id' => 1,
-//            'logo_path' => 'crm.company.com/api/update/company',
-//
-//        ]);
-//    }
+    //    public function cusfile(Request $request)
+    //    {
+    //
+    //        return $request->all();
+    //
+    //        return response()->json([
+    //
+    //            'logo_id' => 1,
+    //            'logo_path' => 'crm.company.com/api/update/company',
+    //
+    //        ]);
+    //    }
 }

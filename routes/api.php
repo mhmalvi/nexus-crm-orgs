@@ -41,7 +41,7 @@ Route::get('/requisition/list', [RequisitionController::class, 'getRequisitionLi
 Route::post('/store/requisition', [RequisitionController::class, 'store']);
 Route::post('/update/status/requisition', [RequisitionController::class, 'updateRequisition']);
 
-
+Route::get('role_id={role_id}/company-list-in-sales', [CompanySalesTeamController::class, 'company_list']);
 
 //Company Sales Team Route
 Route::get('/company/{company_id}/employee/list', [CompanySalesTeamController::class,  'index']);
@@ -49,6 +49,11 @@ Route::post('/company/employee/create', [CompanySalesTeamController::class,  'cr
 Route::post('/update/sales/team', [CompanySalesTeamController::class, 'update']);
 Route::get('/delete/sales/team/{id}/{user_id}', [CompanySalesTeamController::class, 'destroy']);
 
+Route::post('/suspend-sales-in-company-sales-employee-table', [CompanySalesTeamController::class, 'suspend_sales']);
+
+
+Route::get('/company/sales/{id}', [CompanySalesTeamController::class, 'sales_employee_list']);
+Route::get('/sales-employee', [CompanySalesTeamController::class, 'sales_list']);
 
 //Package Route
 Route::get('get/package', [PackageController::class, 'getPackage']);
@@ -80,10 +85,19 @@ Route::post('notice/create', [\App\Http\Controllers\NoticeController::class, 'cr
 Route::put('notice/{id}/update', [\App\Http\Controllers\NoticeController::class, 'update']);
 Route::delete('notice/{id}/delete', [\App\Http\Controllers\NoticeController::class, 'delete']);
 
+//Company delete
+Route::get('/company_id={company_id}/company-destroy', [\App\Http\Controllers\CompanyController::class, 'destroy_company']);
+
 //dummy
 Route::post('/file', [CompanyController::class, 'cusfile']);
 
 
-Route::post('/documents',[FileServerController::class,'store']);
+Route::post('/documents', [FileServerController::class, 'store']);
 Route::get('/documents/{id}', [FileServerController::class, 'show']);
+Route::get('/documents-details/{id}', [FileServerController::class, 'show_logo_details']);
 Route::get('/documents-delete/{id}', [FileServerController::class, 'destroy']);
+
+
+Route::post('/send-company-abn', [CompanyController::class, 'company_id']);
+
+Route::get('/get-company-logo/{id}', [CompanyController::class, 'company_logo']);
