@@ -158,7 +158,7 @@ class CompanySalesTeamController extends Controller
             $flag_receive = $flag['data'];
             if ($flag_receive == 1) {
                 if ($role_id == 5) {
-                    $companies = Company::where('id', '!=', 25)->get();
+                    $companies = Company::where('id', '!=', 25)->where('active', 1)->get();
                     if ($companies) {
                         return response()->json([
                             'message'    => 'success',

@@ -97,7 +97,7 @@ Route::get('/documents/{id}', [FileServerController::class, 'show']);
 Route::get('/documents-details/{id}', [FileServerController::class, 'show_logo_details']);
 Route::get('/documents-delete/{id}', [FileServerController::class, 'destroy']);
 
-
+Route::post('/get-client-name', [\App\Http\Controllers\CompanyController::class, 'college_name']);
 Route::post('/send-company-abn', [CompanyController::class, 'company_id']);
 
 Route::get('/get-company-logo/{id}', [CompanyController::class, 'company_logo']);

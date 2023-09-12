@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\CompanySalesEmployee;
 use App\Models\CompanySubscription;
-use App\Models\FileServer;
 use Carbon\Carbon;
 use Illuminate\Database\DBAL\TimestampType;
 use Illuminate\Http\Request;
@@ -21,6 +20,15 @@ class CompanyController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
+    public function college_name(Request $request)
+    {
+        $college = Company::where('id', $request->client_id)->first();
+        if ($college) {
+            return response()->json([
+                'data' => $college
+            ]);
+        }
+    }
     public function getCompanyList(Request $request)
     {
         try {
@@ -34,6 +42,7 @@ class CompanyController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Company not found',
+                    'data' => []
                 ], 401);
             }
 
@@ -122,6 +131,12 @@ class CompanyController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function company_logo($id)
+    {
+        $company_logo = Company::find($id);
+        dd(json_encode($company_logo));
     }
 
     /**
@@ -221,6 +236,15 @@ class CompanyController extends Controller
         }
     }
 
+    public function company_id(Request $request)
+    {
+        // dd($request->all());
+        $company_id = Company::select('id')->where('abn', $request->abn)->first();
+        return $company_id;
+        // dd(json_encode($company_id->id));
+        // HTTP::get('http://localhost:8002/api/send-company-id',['company_id'=> $company_id->id]);
+    }
+
     /**
      * Get Company By User
      * @param Request $request
@@ -271,15 +295,6 @@ class CompanyController extends Controller
         }
     }
 
-    public function company_id(Request $request)
-    {
-        dd($request->all());
-        $company_id = Company::select('id')->where('abn', $request->abn)->first();
-        return $company_id;
-        // dd(json_encode($company_id->id));
-        // HTTP::get('http://localhost:8002/api/send-company-id',['company_id'=> $company_id->id]);
-    }
-
     /**
      * Get Company By Company
      * @param Request $request
@@ -299,9 +314,9 @@ class CompanyController extends Controller
             $company = Company::select(
                 'companies.id as cid',
                 'companies.name as name',
-                'companies.connect_id as connect',
                 'companies.description as description',
                 'companies.logo_id as logo_id',
+                'companies.connect_id as connect',
                 'companies.contact as contact',
                 'companies.business_email as business_email',
                 'companies.address as address',
@@ -357,13 +372,6 @@ class CompanyController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
-    }
-
-    public function company_logo($id){
-        // dd($id);
-        $company_logo = Company::find($id);
-        // dd($company_logo);
-        $logo = FileServer::find($company_logo->)
     }
 
 
@@ -873,6 +881,42 @@ class CompanyController extends Controller
             $pass[] = $alphabet[$n];
         }
         return implode($pass); //turn the array into a string
+    }
+
+    public function destroy_company(Request $request, $company_id)
+    {
+        if ($request->bearerToken()) {
+            $flag = Http::withToken($request->bearerToken())->post('https://crmuser.quadque.digital/api/check-if-token-exists');
+            $flag_receive = $flag['data'];
+            if ($flag_receive == 1) {
+                // dd("hello");
+                $company = Company::find($company_id);
+                // dd($company->admin);
+                HTTP::post('https://crmuser.quadque.digital/api/user/delete-company-id', ['company_id' => $company->admin]);
+                $delete = $company->delete();
+                if ($delete) {
+                    return response()->json([
+                        'message' => 'Destroyed',
+                        'status' => 201
+                    ], 201);
+                } else {
+                    return response()->json([
+                        'message' => 'Failed',
+                        'status' => 500
+                    ], 500);
+                }
+            } else {
+                return response()->json([
+                    'message' => 'Unauthenticated',
+                    'status' => 401
+                ], 401);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Unauthenticated',
+                'status' => 401
+            ], 401);
+        }
     }
 
 
