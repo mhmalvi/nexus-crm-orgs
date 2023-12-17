@@ -1,0 +1,1 @@
+{id: 2, name: 'Noble Training Academy', description: "Welcome to Noble Training Academy (NTA), where we …need to thrive in today's competitive job market.", logo_id: 4, contact: '6454598', …}

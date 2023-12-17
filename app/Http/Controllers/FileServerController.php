@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FileServer;
+use App\Models\Company;
 
 class FileServerController extends Controller
 {
@@ -69,14 +70,55 @@ class FileServerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+     public function show_logo_details($id)
+    {
+        // return 201;
+        // dd($id);
+        $logo_id = Company::find($id);
+        // dd($logo_id);
+        if($logo_id->logo_id!=null || $logo_id->logo_id!=""){
+            $file_system = FileServer::find($logo_id->logo_id);
+            // dd(json_encode($file_system));
+            if($file_system){
+                return response()->json([
+                    'message'=>'success',
+                    'status'=>200,
+                    'data'=> $file_system->toArray(),
+                    'client'=>$logo_id->name
+                ],200);
+            }else{
+                return response()->json([
+                    'message' => 'Not found',
+                    'status' => 404,
+                ],404);
+            }
+        }else if($logo_id->id){
+                $file_system = FileServer::where('client_id',$logo_id->id)->first();
+            // dd(json_encode($file_system));
+            if($file_system){
+                return response()->json([
+                    'message'=>'success',
+                    'status'=>200,
+                    'data'=> $file_system->toArray(),
+                    'client'=>$logo_id->name
+                ],200);
+            }
+        }
+    }
     public function show($id)
     {
+        // return 201;
+        // dd($id);
+        // $logo_id = Company::where('logo_id',$id)->first();
+        // dd($logo_id);
+        // if($logo_id->logo_id!=null || $logo_id->logo_id!=""){
         $file_system = FileServer::find($id);
+        // dd(json_encode($file_system));
         if($file_system){
             return response()->json([
                 'message'=>'success',
                 'status'=>200,
-                'data'=> $file_system
+                'data'=> $file_system->toArray(),
             ],200);
         }else{
             return response()->json([
@@ -84,6 +126,12 @@ class FileServerController extends Controller
                 'status' => 404,
             ],404);
         }
+        // }else{
+        //     return response()->json([
+        //         'message' => 'Not found',
+        //         'status' => 404,
+        //     ],404);
+        // }
     }
 
     /**
