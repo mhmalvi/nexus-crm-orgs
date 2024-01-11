@@ -31,7 +31,6 @@ class CompanySalesTeamController extends Controller
 
     public function sales_list(Request $request)
     {
-        //  dd($role);
         if ($request->bearerToken()) {
             $userApi = env('USER_SERVICE_API', '');
             $flag = Http::withToken($request->bearerToken())->post($userApi . '/check-if-token-exists');
@@ -42,18 +41,23 @@ class CompanySalesTeamController extends Controller
                 foreach ($company_employee->toArray() as $value) {
                     $salesUserIds[] = $value['user_id'];
                 }
-                $userServiceAPI = env('USER_SERVICE_API', '');
                 if (count($salesUserIds) > 0) {
-                    $response = Http::post($userServiceAPI . '/sales-employee-list', [
-                        'users' => json_encode($salesUserIds), 'role' => 5
-                    ]);
-                    // dd(json_decode($response->body()));
-                    $sales_data = json_decode($response->body());
-                    if (isset($sales_data)) {
+                    if (!isset($salesUserIds)) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'User id required'
+                        ], 406);
+                    }
+                    $data = DB::connection('user')->table('users')->leftJoin('user_profile', function ($join) {
+                        $join->on('user_profile.user_id', '=', 'users.id');
+                    })->whereIn('users.id', $salesUserIds)
+                        ->where('users.status', 1)->where('role_id', 5)
+                        ->get();
+                    if (isset($data)) {
                         return response()->json([
                             'status' => 200,
                             'message' => 'All Sales Employee',
-                            'data'    => $sales_data
+                            'data'    => $data
                         ], 200);
                     }
                 }
