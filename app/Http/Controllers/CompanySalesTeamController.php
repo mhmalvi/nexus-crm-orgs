@@ -33,7 +33,7 @@ class CompanySalesTeamController extends Controller
     {
         if ($request->bearerToken()) {
             
-            $flag = Http::timeout(10)->post('https://crmcompany.queleadscrm.com/api/check-if-token-exists')->withToken($request->bearerToken());
+            $flag = Http::timeout(10)->withToken($request->bearerToken())->post('https://crmcompany.queleadscrm.com/api/check-if-token-exists');
             $flag_receive = $flag['data'];
             if ($flag_receive == 1) {
                 $company_employee = CompanySalesEmployee::where('active', 1)->get();
