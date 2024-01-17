@@ -33,7 +33,7 @@ class CompanySalesTeamController extends Controller
     {
         if ($request->bearerToken()) {
             $userApi = env('USER_SERVICE_API', '');
-            $flag = Http::timeout(10)->withToken($request->bearerToken())->post($userApi . '/check-if-token-exists');
+            $flag = Http::timeout(10)->post($userApi . '/check-if-token-exists')->withToken($request->bearerToken());
             $flag_receive = $flag['data'];
             if ($flag_receive == 1) {
                 $company_employee = CompanySalesEmployee::where('active', 1)->get();
