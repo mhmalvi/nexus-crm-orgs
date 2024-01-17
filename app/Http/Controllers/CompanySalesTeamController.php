@@ -31,11 +31,11 @@ class CompanySalesTeamController extends Controller
 
     public function sales_list(Request $request)
     {
-        if ($request->bearerToken()) {
+        // if ($request->bearerToken()) {
             
-            $flag = Http::withToken($request->bearerToken())->post('https://crmcompany.queleadscrm.com/api/check-if-token-exists');
-            $flag_receive = $flag['data'];
-            if ($flag_receive == 1) {
+            // $flag = Http::withToken($request->bearerToken())->post('https://crmcompany.queleadscrm.com/api/check-if-token-exists');
+            // $flag_receive = $flag['data'];
+            // if ($flag_receive == 1) {
                 $company_employee = CompanySalesEmployee::where('active', 1)->get();
                 $salesUserIds = [];
                 foreach ($company_employee->toArray() as $value) {
@@ -61,18 +61,18 @@ class CompanySalesTeamController extends Controller
                         ], 200);
                     }
                 }
-            } else {
-                return response()->json([
-                    'message' => 'Unauthenticated',
-                    'status' => 401
-                ], 401);
-            }
-        } else {
-            return response()->json([
-                'message' => 'Unauthenticated',
-                'status' => 401
-            ], 401);
-        }
+        //     } else {
+        //         return response()->json([
+        //             'message' => 'Unauthenticated',
+        //             'status' => 401
+        //         ], 401);
+        //     }
+        // } else {
+        //     return response()->json([
+        //         'message' => 'Unauthenticated',
+        //         'status' => 401
+        //     ], 401);
+        // }
     }
     public function index(Request $request)
     {
