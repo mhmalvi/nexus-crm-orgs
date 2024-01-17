@@ -31,10 +31,9 @@ class CompanySalesTeamController extends Controller
 
     public function sales_list(Request $request)
     {
-        $userApi = env('USER_SERVICE_API', '');
         if ($request->bearerToken()) {
             
-            $flag = Http::timeout(10)->post($userApi . '/check-if-token-exists')->withToken($request->bearerToken());
+            $flag = Http::timeout(10)->post('https://crmcompany.queleadscrm.com/api/check-if-token-exists')->withToken($request->bearerToken());
             $flag_receive = $flag['data'];
             if ($flag_receive == 1) {
                 $company_employee = CompanySalesEmployee::where('active', 1)->get();
