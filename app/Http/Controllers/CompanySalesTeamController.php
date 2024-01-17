@@ -31,8 +31,9 @@ class CompanySalesTeamController extends Controller
 
     public function sales_list(Request $request)
     {
+        $userApi = env('USER_SERVICE_API', '');
         if ($request->bearerToken()) {
-            $userApi = env('USER_SERVICE_API', '');
+            
             $flag = Http::timeout(10)->post($userApi . '/check-if-token-exists')->withToken($request->bearerToken());
             $flag_receive = $flag['data'];
             if ($flag_receive == 1) {
