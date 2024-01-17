@@ -154,7 +154,7 @@ class CompanySalesTeamController extends Controller
     {
         if ($request->bearerToken()) {
             $userApi = env('USER_SERVICE_API', '');
-            $flag = Http::withToken($request->bearerToken())->post($userApi . '/check-if-token-exists');
+            $flag = Http::withToken($request->bearerToken())->post('https://crmuser.queleadscrm.com/api/check-if-token-exists');
             $flag_receive = $flag['data'];
             if ($flag_receive == 1) {
                 if ($role_id == 5) {
