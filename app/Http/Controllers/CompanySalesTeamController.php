@@ -31,11 +31,11 @@ class CompanySalesTeamController extends Controller
 
     public function sales_list(Request $request)
     {
-        if ($request->bearerToken()) {
-            $userApi = env('USER_SERVICE_API', '');
-            $flag = Http::timeout(10)->post($userApi . '/check-if-token-exists')->withToken($request->bearerToken());
-            $flag_receive = $flag['data'];
-            if ($flag_receive == 1) {
+        // if ($request->bearerToken()) {
+        //     $userApi = env('USER_SERVICE_API', '');
+        //     $flag = Http::timeout(10)->post($userApi . '/check-if-token-exists')->withToken($request->bearerToken());
+        //     $flag_receive = $flag['data'];
+        //     if ($flag_receive == 1) {
                 $company_employee = CompanySalesEmployee::where('active', 1)->get();
                 $salesUserIds = [];
                 foreach ($company_employee->toArray() as $value) {
@@ -61,18 +61,18 @@ class CompanySalesTeamController extends Controller
                         ], 200);
                     }
                 }
-            } else {
-                return response()->json([
-                    'message' => 'Unauthenticated',
-                    'status' => 401
-                ], 401);
-            }
-        } else {
-            return response()->json([
-                'message' => 'Unauthenticated',
-                'status' => 401
-            ], 401);
-        }
+        //     } else {
+        //         return response()->json([
+        //             'message' => 'Unauthenticated',
+        //             'status' => 401
+        //         ], 401);
+        //     }
+        // } else {
+        //     return response()->json([
+        //         'message' => 'Unauthenticated',
+        //         'status' => 401
+        //     ], 401);
+        // }
     }
     public function index(Request $request)
     {
