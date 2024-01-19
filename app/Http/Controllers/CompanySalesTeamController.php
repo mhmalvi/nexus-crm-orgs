@@ -109,7 +109,7 @@ class CompanySalesTeamController extends Controller
                 $userServiceAPI = env('USER_SERVICE_API', '');
                 //dd($userServiceAPI);
 
-                $response = Http::post($userServiceAPI . '/user/list', [
+                $response = Http::post('https://crmuser.queleadscrm.com/api/user/list', [
                     'users' => json_encode($salesUserIds)
                 ]);
                 // dd(json_decode($response->body()));
