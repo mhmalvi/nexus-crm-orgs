@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Http::macro('crm_user', function () {
+            return Http::baseUrl('https://crmuser.queleadscrm.com/api');
+        });
     }
 }
