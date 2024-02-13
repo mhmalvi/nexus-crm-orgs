@@ -50,7 +50,6 @@ class FileServerController extends Controller
                 $file_system->document_name = $file_path;
             }
             $file_system->save();
-            dd($file_system);
             Company::where('id', $request->client_id)->where('admin', $request->user_id)->update(['logo_id' => $file_system->id]);
             return response()->json([
                 'message' => 'success',
