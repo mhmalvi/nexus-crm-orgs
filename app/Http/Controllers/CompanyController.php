@@ -156,9 +156,8 @@ class CompanyController extends Controller
             ], 401);
 
         try {
-
             $filename = '';
-
+            
             //insert all data in database
             $company = Company::where('id', $request->id)
                 ->update([

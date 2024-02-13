@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\FileServer;
 use App\Models\Company;
+use App\Models\FileServer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FileServerController extends Controller
 {
@@ -36,31 +37,29 @@ class FileServerController extends Controller
      */
     public function store(Request $request)
     {
-        $file_system = new FileServer();
-        $file_system->user_id = $request->user_id;
-        $file_system->client_id = $request->client_id;
-        $file_system->document_details = $request->document_details; 
-        if ($request->document_name) {
-            $fileName = time() . '.' . $request->document_name->getClientOriginalExtension();
-            $request->document_name->move(public_path('assets/fileSystem'), $fileName);
-            $file_path = "assets/fileSystem/" . $fileName;
-            $file_system->document_name = $file_path;
-            
-        }
-        $save = $file_system->save();
-        // dd($file_system);
-        if ($save) {
+        DB::beginTransaction();
+        try {
+            $file_system = FileServer::where('user_id', $request->user_id)->where('client_id', $request->client_id)->first();
+            $file_system->user_id = $request->user_id;
+            $file_system->client_id = $request->client_id;
+            $file_system->document_details = $request->document_details;
+            if ($request->document_name) {
+                $fileName = time() . '.' . $request->document_name->getClientOriginalExtension();
+                $request->document_name->move(public_path('assets/fileSystem'), $fileName);
+                $file_path = "assets/fileSystem/" . $fileName;
+                $file_system->document_name = $file_path;
+            }
+            $file_system->save();
+            Company::where('id', $request->client_id)->where('admin', $request->user_id)->update(['logo_id' => $file_system->id]);
             return response()->json([
                 'message' => 'success',
                 'status' => 200,
                 'data' => $file_system
-            ],200);
-        }else{
-            return response()->json([
-                'message' => 'success',
-                'status' => 500,
-                'data' => $fileName
-            ],500);
+            ], 200);
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
     }
 
@@ -70,38 +69,38 @@ class FileServerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-     public function show_logo_details($id)
+    public function show_logo_details($id)
     {
         // return 201;
         // dd($id);
         $logo_id = Company::find($id);
         // dd($logo_id);
-        if($logo_id->logo_id!=null || $logo_id->logo_id!=""){
+        if ($logo_id->logo_id != null || $logo_id->logo_id != "") {
             $file_system = FileServer::find($logo_id->logo_id);
             // dd(json_encode($file_system));
-            if($file_system){
+            if ($file_system) {
                 return response()->json([
-                    'message'=>'success',
-                    'status'=>200,
-                    'data'=> $file_system->toArray(),
-                    'client'=>$logo_id->name
-                ],200);
-            }else{
+                    'message' => 'success',
+                    'status' => 200,
+                    'data' => $file_system->toArray(),
+                    'client' => $logo_id->name
+                ], 200);
+            } else {
                 return response()->json([
                     'message' => 'Not found',
                     'status' => 404,
-                ],404);
+                ], 404);
             }
-        }else if($logo_id->id){
-                $file_system = FileServer::where('client_id',$logo_id->id)->first();
+        } else if ($logo_id->id) {
+            $file_system = FileServer::where('client_id', $logo_id->id)->first();
             // dd(json_encode($file_system));
-            if($file_system){
+            if ($file_system) {
                 return response()->json([
-                    'message'=>'success',
-                    'status'=>200,
-                    'data'=> $file_system->toArray(),
-                    'client'=>$logo_id->name
-                ],200);
+                    'message' => 'success',
+                    'status' => 200,
+                    'data' => $file_system->toArray(),
+                    'client' => $logo_id->name
+                ], 200);
             }
         }
     }
@@ -114,17 +113,17 @@ class FileServerController extends Controller
         // if($logo_id->logo_id!=null || $logo_id->logo_id!=""){
         $file_system = FileServer::find($id);
         // dd(json_encode($file_system));
-        if($file_system){
+        if ($file_system) {
             return response()->json([
-                'message'=>'success',
-                'status'=>200,
-                'data'=> $file_system->toArray(),
-            ],200);
-        }else{
+                'message' => 'success',
+                'status' => 200,
+                'data' => $file_system->toArray(),
+            ], 200);
+        } else {
             return response()->json([
                 'message' => 'Not found',
                 'status' => 404,
-            ],404);
+            ], 404);
         }
         // }else{
         //     return response()->json([
@@ -166,16 +165,16 @@ class FileServerController extends Controller
     public function destroy($id)
     {
         $file_system = FileServer::find($id);
-        if($file_system){
-            $delete=$file_system->delete();
-            if($delete){
+        if ($file_system) {
+            $delete = $file_system->delete();
+            if ($delete) {
                 return response()->json([
-                    'message'=>'deleted',
-                    'status'=>200,
-                    'data'=>$file_system
+                    'message' => 'deleted',
+                    'status' => 200,
+                    'data' => $file_system
                 ]);
             }
-        }else{
+        } else {
             return response()->json([
                 'message' => 'Not found',
                 'status' => 404,
