@@ -37,7 +37,6 @@ class FileServerController extends Controller
      */
     public function store(Request $request)
     {
-        // DB::beginTransaction();
         try {
             $file_system = FileServer::where('user_id', $request->user_id)->where('client_id', $request->client_id)->first();
             $file_system->user_id = $request->user_id;
@@ -56,9 +55,7 @@ class FileServerController extends Controller
                 'status' => 200,
                 'data' => $file_system
             ], 200);
-            // DB::commit();
         } catch (\Throwable $th) {
-            // DB::rollBack();
             throw $th;
         }
     }
