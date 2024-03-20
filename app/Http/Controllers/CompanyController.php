@@ -925,7 +925,7 @@ class CompanyController extends Controller
         // if ($isExists) {
             $results = Company::select('end_date')->get();
             $results = json_decode($results[10])->end_date;
-            if($results > Carbon::now()->toDateTimeString()){
+            if($results < Carbon::now()->toDateTimeString()){
                 dd('true');
             }else{
                 dd('false');
