@@ -924,12 +924,17 @@ class CompanyController extends Controller
         // $isExists = Company::select('end_date')->where('end_date','!=','')->exists();
         // if ($isExists) {
             $results = Company::select('end_date')->get();
-            dd(json_decode($results[10])->end_date);
-            if ($results) {
-                foreach ($results as $result) {
-                    print_r(json_decode($result['end_date']));
-                }
+            $results = json_decode($results[10])->end_date;
+            if($results > Carbon::now()->toDateTimeString()){
+                dd('true');
+            }else{
+                dd('false');
             }
+            // if ($results) {
+            //     foreach ($results as $result) {
+            //         print_r(json_decode($result['end_date']));
+            //     }
+            // }
         // }
     }
 
