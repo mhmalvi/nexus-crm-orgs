@@ -924,7 +924,7 @@ class CompanyController extends Controller
         // $isExists = Company::select('end_date')->where('end_date','!=','')->exists();
         // if ($isExists) {
             $results = Company::select('end_date')->get();
-            dd($results);
+            dd(json_decode($results));
             if ($results) {
                 foreach ($results as $result) {
                     print_r(json_decode($result['end_date']));
