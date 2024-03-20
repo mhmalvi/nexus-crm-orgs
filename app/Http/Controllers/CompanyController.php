@@ -157,7 +157,7 @@ class CompanyController extends Controller
 
         try {
             $filename = '';
-            
+
             //insert all data in database
             $company = Company::where('id', $request->id)
                 ->update([
@@ -889,22 +889,22 @@ class CompanyController extends Controller
         //     $flag = Http::withToken($request->bearerToken())->post($userApi . '/check-if-token-exists');
         //     $flag_receive = $flag['data'];
         //     if ($flag_receive == 1) {
-                // dd("hello");
-                $company = Company::find($company_id);
-                // dd($company->admin);
-                HTTP::post($userApi.'/user/delete-company-id', ['company_id' => $company->admin]);
-                $delete = $company->delete();
-                if ($delete) {
-                    return response()->json([
-                        'message' => 'Destroyed',
-                        'status' => 201
-                    ], 201);
-                } else {
-                    return response()->json([
-                        'message' => 'Failed',
-                        'status' => 500
-                    ], 500);
-                }
+        // dd("hello");
+        $company = Company::find($company_id);
+        // dd($company->admin);
+        HTTP::post($userApi . '/user/delete-company-id', ['company_id' => $company->admin]);
+        $delete = $company->delete();
+        if ($delete) {
+            return response()->json([
+                'message' => 'Destroyed',
+                'status' => 201
+            ], 201);
+        } else {
+            return response()->json([
+                'message' => 'Failed',
+                'status' => 500
+            ], 500);
+        }
         //     } else {
         //         return response()->json([
         //             'message' => 'Unauthenticated',
@@ -917,6 +917,19 @@ class CompanyController extends Controller
         //         'status' => 401
         //     ], 401);
         // }
+    }
+
+    public function end_date()
+    {
+        $isExists = Company::select('end_date')->exists();
+        if ($isExists) {
+            $results = Company::select('end_date')->get();
+            if ($results) {
+                foreach ($results as $result) {
+                    print_r(json_decode($result['end_date']));
+                }
+            }
+        }
     }
 
 

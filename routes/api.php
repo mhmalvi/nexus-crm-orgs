@@ -101,3 +101,5 @@ Route::post('/get-client-name',[\App\Http\Controllers\CompanyController::class,'
 Route::post('/send-company-abn',[CompanyController::class, 'company_id']);
 
 Route::get('/get-company-logo/{id}', [CompanyController::class, 'company_logo']);
+
+Route::get('end-date',[CompanyController::class,'end_date']);
