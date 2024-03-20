@@ -31,7 +31,7 @@ class SubscriptionExpire extends Command
             $results = Company::select('end_date')->get();
             if($results){
                 foreach($results as $result){
-                    print_r(json_decode($result));
+                    print_r(json_decode($result->end_date));
 
                 }
             }
