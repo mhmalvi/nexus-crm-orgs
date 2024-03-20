@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('package-reminder:cron')
             ->everyMinute();
+            $schedule->command('app:subscription-expire')
+            ->everyMinute();
     }
 
     /**
