@@ -921,7 +921,7 @@ class CompanyController extends Controller
 
     public function end_date()
     {
-        $isExists = Company::select('end_date')->exists();
+        $isExists = Company::select('end_date')->where('end_date','!=','')->exists();
         if ($isExists) {
             $results = Company::select('end_date')->get();
             if ($results) {
