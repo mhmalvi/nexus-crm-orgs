@@ -259,9 +259,9 @@ class CompanyController extends Controller
 
         try {
             if ($request->role_id == 3) { // If Admin
-                $company = Company::select('*');
-                $company = $company->where('admin', $request->user_id)->where('active', 1);
-                $company = $company->first();
+                $company = Company::where('admin', $request->user_id)->where('active', 1)->first();
+                // $company = $company->where('admin', $request->user_id)->where('active', 1);
+                // $company = $company->first();
             } else {
                 $company = Company::join('company_sales_employee', function ($join) {
                     $join->on('company_sales_employee.company_id', '=', 'companies.id');
