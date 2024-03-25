@@ -259,7 +259,7 @@ class CompanyController extends Controller
 
         try {
             if ($request->role_id == 3) { // If Admin
-                $company = Company::where('admin', $request->user_id)->where('active', 1)->first();
+                $company = Company::where('admin', $request->user_id)->where('active', 1)->orWhere('active',2)->first();
                 // $company = $company->where('admin', $request->user_id)->where('active', 1);
                 // $company = $company->first();
             } else {
