@@ -1,64 +1,106 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Nexus CRM Orgs
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The company and organization management microservice for the **Nexus CRM** platform. This Laravel-based API manages multi-tenant company profiles, sales team structures, subscription packages, document storage, and internal notice boards.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Company Management** — Full CRUD operations for company profiles with status control and token-based access
+- **Multi-Tenant Architecture** — Isolated company contexts with per-organization data boundaries
+- **Sales Team Management** — Add, update, suspend, and remove sales employees within a company
+- **Package System** — Define and manage subscription packages with configurable limits
+- **Package Subscriptions** — Assign packages to companies with subscription lifecycle management
+- **Subscription Plans** — Create and manage tiered subscription offerings
+- **Requisition System** — Submit, track, and approve internal requisition requests
+- **Notice Board** — Company-wide announcements with CRUD operations
+- **Document Storage** — Upload, retrieve, and manage company documents and logos
+- **Automated Cron Jobs** — Scheduled tasks for subscription renewals and company status checks
+- **Verification System** — Company verification code validation for renewal workflows
+- **ABN Lookup** — Retrieve company identification by ABN (Australian Business Number)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Layer | Technology |
+|-------|-----------|
+| Framework | Laravel 10 |
+| Language | PHP 8.1+ |
+| Authentication | Laravel Sanctum |
+| HTTP Client | Guzzle |
+| Database | MySQL |
+| Testing | PHPUnit 10 |
+| Code Style | StyleCI |
 
-## Learning Laravel
+## Prerequisites
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP >= 8.1
+- Composer
+- MySQL 5.7+ or MariaDB 10.3+
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Getting Started
 
-## Laravel Sponsors
+1. **Clone the repository**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+   ```bash
+   git clone https://github.com/mhmalvi/nexus-crm-orgs.git
+   cd nexus-crm-orgs
+   ```
 
-### Premium Partners
+2. **Install dependencies**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+   ```bash
+   composer install
+   ```
 
-## Contributing
+3. **Configure environment**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Code of Conduct
+   Update `.env` with database credentials and inter-service URLs.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Run database migrations**
 
-## Security Vulnerabilities
+   ```bash
+   php artisan migrate
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   Alternatively, import the provided `crm_company.sql` schema file.
+
+5. **Start the development server**
+
+   ```bash
+   php artisan serve
+   ```
+
+   The API will be available at `http://localhost:8000`.
+
+## API Overview
+
+| Endpoint Group | Description |
+|---------------|-------------|
+| `POST /api/company/create` | Register a new company |
+| `GET /api/company/{id}/details` | Get company profile |
+| `PUT /api/company/update` | Update company information |
+| `POST /api/company/list` | List companies with filters |
+| `POST /api/company/employee/create` | Add a sales team member |
+| `GET /api/company/{id}/employee/list` | List company employees |
+| `POST /api/store/requisition` | Submit a requisition |
+| `GET /api/requisition/list` | List all requisitions |
+| `POST /api/notice/create` | Create a notice |
+| `POST /api/store/package` | Define a subscription package |
+| `POST /api/documents` | Upload a document |
+| `GET /api/get-company-logo/{id}` | Retrieve company logo |
+
+## Microservices Integration
+
+| Service | Interaction |
+|---------|------------|
+| nexus-crm-users | Syncs user accounts with company employee records |
+| nexus-crm-leads | Provides company context for multi-tenant lead operations |
+| nexus-crm-payments | Links subscriptions to payment billing cycles |
+| nexus-crm-alerts | Triggers notifications for company events and requisition updates |
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary software. All rights reserved.
